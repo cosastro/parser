@@ -14,7 +14,7 @@ from data_utils import batch_loader, make_dataset, split_train_test
 
 def train(n_epochs=10):
     torch.set_num_threads(4)
-    torch.manual_seef(1)
+    torch.manual_seed(1)
     data_file = 'data/train-stanford-raw.conll'
     # if vocab_file is given (ie for pretrained wordvectors), use x2i and i2x from this file.
     # If not given, create new vocab file in data
@@ -40,22 +40,18 @@ def train(n_epochs=10):
     print('creating model...')
     # make model
     model = BiAffineParser(n_word_vocab=len(x2i['word']),
-                           n_word_embed=100,
                            n_pos_vocab=len(x2i['tag']),
+                           n_word_embed=100,
                            n_pos_embed=28,
-                           emb_drop=0.33,
-                           lstm_hidden=512,
+                           n_lstm_hidden=512,
                            n_lstm_layers=4,
+                           n_mlp_hidden=100,
+                           n_mlp_layers=1,
+                           emb_drop=0.33,
                            lstm_drop=0.33,
-                           arc_hidden=256,
-                           arc_depth=1,
-                           arc_drop=0.33,
-                           lab_hidden=128,
-                           lab_depth=1,
-                           lab_drop=0.33,
+                           mlp_drop=0.33,
                            n_labels=len(x2i['label']))
     print(model)
-    base_params, arc_params, lab_params = model.get_param_groups()
 
     optimizer = Adam(params=model.parameters(), lr=2e-3, betas=(0.9, 0.9))
     sched = ReduceLROnPlateau(optimizer=optimizer,
@@ -141,6 +137,7 @@ def get_arc_loss(S_arc, arcs):
     """
     logits = S_arc.transpose(-1, -2)[arcs[:, 0], arcs[:, 2], :]
     heads = torch.from_numpy(arcs[:, 1])
+
     return F.cross_entropy(logits, heads)
 
 

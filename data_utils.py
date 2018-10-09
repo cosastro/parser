@@ -8,7 +8,6 @@ from collections import Counter, defaultdict
 
 import numpy as np
 import torch
-from torch.autograd import Variable
 
 PAD_TOKEN = '<PAD>'
 UNK_TOKEN = '<UNK>'
@@ -263,8 +262,8 @@ def prepare_batch(batch, pad_idx):
             words[i, j] = word[1]
             tags[i, j] = word[2]
 
-    words = Variable(torch.from_numpy(words))
-    tags = Variable(torch.from_numpy(tags))
+    words = torch.from_numpy(words)
+    tags = torch.from_numpy(tags)
 
     # generate arcs
     # each arc is [batch_idx, head_idx, dep_idx, label_idx]
