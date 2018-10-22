@@ -5,18 +5,15 @@ from torch import nn
 
 class MLP(nn.Module):
 
-    def __init__(self, input_size, layer_size, depth, drop):
+    def __init__(self, input_size, layer_size, drop):
         super(MLP, self).__init__()
 
-        self.layers = nn.ModuleList()
-        for _ in range(depth):
-            self.layers.append(nn.Sequential(nn.Linear(input_size, layer_size),
-                                             nn.ReLU(),
-                                             nn.Dropout(drop)))
-            input_size = layer_size
+        self.layer = nn.Sequential(nn.Linear(input_size, layer_size),
+                                   nn.ReLU())
+        self.drop = nn.Dropout(drop)
 
     def forward(self, x):
-        for layer in self.layers:
-            x = layer(x)
+        x = self.layer(x)
+        x = self.drop(x)
 
         return x

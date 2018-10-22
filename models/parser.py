@@ -10,8 +10,8 @@ from modules import MLP, BiAffineAttn
 
 class BiAffineParser(nn.Module):
     def __init__(self, n_word_vocab, n_pos_vocab, n_word_embed, n_pos_embed,
-                 n_lstm_hidden, n_lstm_layers, n_mlp_hidden, n_mlp_layers,
-                 emb_drop, lstm_drop, mlp_drop, n_labels):
+                 n_lstm_hidden, n_lstm_layers, n_mlp_hidden, n_labels,
+                 emb_drop, lstm_drop, mlp_drop):
         super(BiAffineParser, self).__init__()
 
         # Embeddings
@@ -22,6 +22,7 @@ class BiAffineParser(nn.Module):
         # LSTM
         self.lstm = nn.LSTM(input_size=n_word_embed + n_pos_embed,
                             hidden_size=n_lstm_hidden,
+                            num_layers=n_lstm_layers,
                             batch_first=True,
                             dropout=lstm_drop,
                             bidirectional=True)
@@ -29,20 +30,16 @@ class BiAffineParser(nn.Module):
         # MLP层
         self.arc_mlp_h = MLP(n_lstm_hidden * 2,
                              n_mlp_hidden,
-                             n_mlp_layers,
                              mlp_drop)
         self.arc_mlp_d = MLP(n_lstm_hidden * 2,
                              n_mlp_hidden,
-                             n_mlp_layers,
                              mlp_drop)
 
         self.lab_mlp_h = MLP(n_lstm_hidden * 2,
                              n_mlp_hidden,
-                             n_mlp_layers,
                              mlp_drop)
         self.lab_mlp_d = MLP(n_lstm_hidden * 2,
                              n_mlp_hidden,
-                             n_mlp_layers,
                              mlp_drop)
         # BiAffine layers
         self.arc_attn = BiAffineAttn(in_dim=n_mlp_hidden,
@@ -78,7 +75,7 @@ class BiAffineParser(nn.Module):
         lab_d = self.lab_mlp_d(x)
 
         # Attention
-        S_arc = self.arc_attn(arc_h, arc_d)
-        S_lab = self.lab_attn(lab_h, lab_d)
+        s_arc = self.arc_attn(arc_h, arc_d)
+        s_lab = self.lab_attn(lab_h, lab_d)
 
-        return S_arc, S_lab
+        return s_arc, s_lab

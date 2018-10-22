@@ -29,7 +29,7 @@ def parse_conllu(filename, clean=True):
     cols = [0, 1, 3, 6, 7]
     with open(filename, 'r', encoding='utf-8') as f:
         # read all lines, remove comments
-        data = [line for line in f.readlines() if not line.startswith('#')]
+        data = [line for line in f if not line.startswith('#')]
 
     # split sentences
     newline_idx = [i for i, s in enumerate(data) if s == '\n']
