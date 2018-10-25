@@ -7,7 +7,7 @@ class Config(object):
     ftest = 'data/cdt-test.conll'
     fembed = 'data/giga.100.txt'
     n_embed = 100
-    n_char_embed = 30
+    n_char_embed = 50
     n_char_out = 300
     n_lstm_hidden = 150
     n_lstm_layers = 2
