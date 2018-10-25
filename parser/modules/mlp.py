@@ -15,8 +15,7 @@ class MLP(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
-        nn.init.orthogonal_(self.linear.weight,
-                            gain=nn.init.calculate_gain(self.activation))
+        nn.init.orthogonal_(self.linear.weight)
         nn.init.zeros_(self.linear.bias)
 
     def forward(self, x):
