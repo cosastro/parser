@@ -18,7 +18,7 @@ if __name__ == '__main__':
     )
     parser.add_argument('--drop', action='store', default=0.33, type=float,
                         help='set the prob of dropout')
-    parser.add_argument('--batch_size', action='store', default=50, type=int,
+    parser.add_argument('--batch_size', action='store', default=200, type=int,
                         help='set the size of batch')
     parser.add_argument('--epochs', action='store', default=100, type=int,
                         help='set the max num of epochs')

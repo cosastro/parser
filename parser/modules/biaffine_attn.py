@@ -53,6 +53,6 @@ class BiAffineAttn(nn.Module):
         """
         Add column of ones to each matrix in batch.
         """
-        b = torch.ones(X.shape[:-1]).unsqueeze(-1)
+        b = torch.ones(X.shape[:-1], device=X.device).unsqueeze(-1)
 
         return torch.cat([X, b], -1)
