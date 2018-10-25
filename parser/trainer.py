@@ -85,11 +85,15 @@ class Trainer(object):
         for x, char_x, heads, labels in loader:
             mask = x.gt(0)
             s_arc, s_lab = self.model(x, char_x)
-            loss += self.get_loss(s_arc[mask], s_lab[mask],
-                                  heads[mask], labels[mask])
-            pred_arcs = torch.argmax(s_arc)
-            pred_labels = torch.argmax(s_lab[torch.arange(len(s_lab)), heads])
-            metric(pred_arcs, pred_labels, gold_arcs, gold_labels)
+            s_arc = s_arc[mask]
+            s_lab = s_lab[mask]
+            heads = heads[mask]
+            labels = labels[mask]
+            loss += self.get_loss(s_arc, s_lab, heads, labels)
+            pred_arcs = torch.argmax(s_arc, dim=1)
+            pred_labels = torch.argmax(
+                s_lab[torch.arange(len(s_lab)), heads], dim=1)
+            metric(pred_arcs, pred_labels, heads, labels)
         loss /= len(loader)
 
         return loss, metric
