@@ -12,3 +12,5 @@ class Config(object):
     n_lstm_hidden = 150
     n_lstm_layers = 2
     n_mlp_hidden = 150
+    betas = (0.9, 0.9)
+    epsilon = 1e-12

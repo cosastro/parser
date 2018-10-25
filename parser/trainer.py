@@ -11,17 +11,18 @@ import torch.optim as optim
 
 class Trainer(object):
 
-    def __init__(self, model, vocab):
+    def __init__(self, model, vocab, optimizer, scheduler):
         super(Trainer, self).__init__()
 
         self.model = model
         self.vocab = vocab
+        self.optimizer = optimizer
+        self.scheduler = scheduler
 
     def fit(self, train_loader, dev_loader, test_loader,
-            epochs, patience, lr, file):
+            epochs, patience, file):
         total_time = timedelta()
         max_e, max_metric = 0, 0.0
-        self.optimizer = optim.Adam(params=self.model.parameters(), lr=lr)
 
         for epoch in range(1, epochs + 1):
             start = datetime.now()
@@ -74,6 +75,7 @@ class Trainer(object):
             loss.backward()
             nn.utils.clip_grad_norm_(self.model.parameters(), 5.0)
             self.optimizer.step()
+            self.scheduler.step()
 
     @torch.no_grad()
     def evaluate(self, loader):

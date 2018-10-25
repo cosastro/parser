@@ -2,15 +2,16 @@
 
 import argparse
 import os
-
-import torch
-from torch.utils.data import DataLoader
-
-from config import Config
 from parser import Trainer
 from parser.data import Corpus, Embedding, TextDataset, Vocab, collate_fn
 from parser.models import BiAffineParser
 from parser.utils import init_embedding, numericalize
+
+import torch
+import torch.optim as optim
+from torch.utils.data import DataLoader
+
+from config import Config
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -24,7 +25,7 @@ if __name__ == '__main__':
                         help='set the max num of epochs')
     parser.add_argument('--patience', action='store', default=10, type=int,
                         help='set the num of epochs to be patient')
-    parser.add_argument('--lr', action='store', default=0.001, type=float,
+    parser.add_argument('--lr', action='store', default=2e-3, type=float,
                         help='set the learning rate of training')
     parser.add_argument('--threads', '-t', action='store', default=4, type=int,
                         help='set the max num of threads')
@@ -92,11 +93,19 @@ if __name__ == '__main__':
         model = model.cuda()
     print(f"{model}\n")
 
-    trainer = Trainer(model=model, vocab=vocab)
+    optimizer = optim.Adam(params=model.parameters(),
+                           betas=Config.betas, lr=args.lr,
+                           eps=Config.epsilon)
+    scheduler = optim.lr_scheduler.LambdaLR(optimizer=optimizer,
+                                            lr_lambda=lambda x: .75 ** (x / 5000))
+
+    trainer = Trainer(model=model,
+                      vocab=vocab,
+                      optimizer=optimizer,
+                      scheduler=scheduler)
     trainer.fit(train_loader=train_loader,
                 dev_loader=dev_loader,
                 test_loader=test_loader,
                 epochs=args.epochs,
                 patience=args.patience,
-                lr=args.lr,
                 file=args.file)
