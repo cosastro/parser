@@ -31,7 +31,7 @@ class Metric(object):
 class AttachmentMethod(Metric):
 
     def __init__(self, eps=1e-5):
-        super(AccuracyMethod, self).__init__()
+        super(AttachmentMethod, self).__init__()
 
         self.correct_arcs = 0.0
         self.correct_labels = 0.0
