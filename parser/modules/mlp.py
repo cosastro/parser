@@ -19,7 +19,8 @@ class MLP(nn.Module):
         nn.init.zeros_(self.linear.bias)
 
     def forward(self, x):
-        x = self.layer(x)
+        x = self.linear(x)
+        x = self.activation(x)
         x = self.drop(x)
 
         return x
