@@ -32,28 +32,28 @@ BiAffineParser(
   (arc_mlp_h): MLP(
     (layer): Sequential(
       (0): Linear(in_features=300, out_features=150, bias=True)
-      (1): ReLU()
+      (1): LeakyReLU(negative_slope=0.1)
     )
     (drop): Dropout(p=0.33)
   )
   (arc_mlp_d): MLP(
     (layer): Sequential(
       (0): Linear(in_features=300, out_features=150, bias=True)
-      (1): ReLU()
+      (1): LeakyReLU(negative_slope=0.1)
     )
     (drop): Dropout(p=0.33)
   )
   (lab_mlp_h): MLP(
     (layer): Sequential(
       (0): Linear(in_features=300, out_features=150, bias=True)
-      (1): ReLU()
+      (1): LeakyReLU(negative_slope=0.1)
     )
     (drop): Dropout(p=0.33)
   )
   (lab_mlp_d): MLP(
     (layer): Sequential(
       (0): Linear(in_features=300, out_features=150, bias=True)
-      (1): ReLU()
+      (1): LeakyReLU(negative_slope=0.1)
     )
     (drop): Dropout(p=0.33)
   )
@@ -63,240 +63,318 @@ BiAffineParser(
 )
 
 Epoch: 1 / 100:
-train: Loss: 2.6473 LAS: 39.43% UAS: 31.25%
-dev:   Loss: 2.6993 LAS: 38.67% UAS: 29.99%
-test:  Loss: 2.6881 LAS: 39.15% UAS: 30.55%
-0:00:24.502121s elapsed
+train: Loss: 2.6077 LAS: 39.29% UAS: 32.09%
+dev:   Loss: 2.6571 LAS: 38.44% UAS: 31.04%
+test:  Loss: 2.6468 LAS: 39.32% UAS: 31.88%
+0:00:24.513976s elapsed
 
 Epoch: 2 / 100:
-train: Loss: 1.3846 LAS: 62.87% UAS: 61.94%
-dev:   Loss: 1.4590 LAS: 60.96% UAS: 59.84%
-test:  Loss: 1.4616 LAS: 61.54% UAS: 60.30%
-0:00:24.381395s elapsed
+train: Loss: 1.3541 LAS: 63.79% UAS: 63.19%
+dev:   Loss: 1.4291 LAS: 61.96% UAS: 61.30%
+test:  Loss: 1.4326 LAS: 62.18% UAS: 61.49%
+0:00:24.270969s elapsed
 
 Epoch: 3 / 100:
-train: Loss: 1.0327 LAS: 71.32% UAS: 71.73%
-dev:   Loss: 1.1523 LAS: 68.69% UAS: 68.80%
-test:  Loss: 1.1539 LAS: 68.93% UAS: 69.02%
-0:00:24.366573s elapsed
+train: Loss: 1.0157 LAS: 71.67% UAS: 72.18%
+dev:   Loss: 1.1385 LAS: 69.01% UAS: 69.09%
+test:  Loss: 1.1370 LAS: 69.25% UAS: 69.43%
+0:00:24.299981s elapsed
 
 Epoch: 4 / 100:
-train: Loss: 0.8529 LAS: 75.85% UAS: 76.69%
-dev:   Loss: 1.0146 LAS: 72.42% UAS: 72.67%
-test:  Loss: 1.0246 LAS: 72.35% UAS: 72.86%
-0:00:24.793954s elapsed
+train: Loss: 0.8398 LAS: 76.27% UAS: 77.08%
+dev:   Loss: 0.9969 LAS: 72.64% UAS: 72.99%
+test:  Loss: 1.0054 LAS: 72.67% UAS: 73.12%
+0:00:24.298373s elapsed
 
 Epoch: 5 / 100:
-train: Loss: 0.7483 LAS: 78.89% UAS: 79.92%
-dev:   Loss: 0.9338 LAS: 74.93% UAS: 75.27%
-test:  Loss: 0.9447 LAS: 74.69% UAS: 75.16%
-0:00:24.511246s elapsed
+train: Loss: 0.7302 LAS: 79.30% UAS: 80.45%
+dev:   Loss: 0.9255 LAS: 74.95% UAS: 75.50%
+test:  Loss: 0.9362 LAS: 74.70% UAS: 75.41%
+0:00:24.553285s elapsed
 
 Epoch: 6 / 100:
-train: Loss: 0.6488 LAS: 81.12% UAS: 82.38%
-dev:   Loss: 0.8862 LAS: 75.91% UAS: 76.52%
-test:  Loss: 0.8950 LAS: 75.98% UAS: 76.71%
-0:00:24.637671s elapsed
+train: Loss: 0.6476 LAS: 81.28% UAS: 82.52%
+dev:   Loss: 0.8720 LAS: 76.08% UAS: 76.87%
+test:  Loss: 0.8839 LAS: 76.08% UAS: 76.92%
+0:00:24.323197s elapsed
 
 Epoch: 7 / 100:
-train: Loss: 0.5909 LAS: 82.73% UAS: 84.07%
-dev:   Loss: 0.8586 LAS: 76.85% UAS: 77.59%
-test:  Loss: 0.8698 LAS: 76.42% UAS: 77.38%
-0:00:24.578053s elapsed
+train: Loss: 0.5735 LAS: 83.38% UAS: 84.76%
+dev:   Loss: 0.8452 LAS: 77.10% UAS: 77.85%
+test:  Loss: 0.8600 LAS: 76.87% UAS: 77.82%
+0:00:24.487879s elapsed
 
 Epoch: 8 / 100:
-train: Loss: 0.5348 LAS: 84.34% UAS: 85.65%
-dev:   Loss: 0.8406 LAS: 77.58% UAS: 78.25%
-test:  Loss: 0.8592 LAS: 77.29% UAS: 78.20%
-0:00:24.935671s elapsed
+train: Loss: 0.5187 LAS: 84.84% UAS: 86.30%
+dev:   Loss: 0.8085 LAS: 77.74% UAS: 78.74%
+test:  Loss: 0.8332 LAS: 77.34% UAS: 78.43%
+0:00:24.330110s elapsed
 
 Epoch: 9 / 100:
-train: Loss: 0.4848 LAS: 85.61% UAS: 87.10%
-dev:   Loss: 0.8277 LAS: 77.72% UAS: 78.77%
-test:  Loss: 0.8410 LAS: 77.71% UAS: 78.72%
-0:00:24.993314s elapsed
+train: Loss: 0.4732 LAS: 86.12% UAS: 87.57%
+dev:   Loss: 0.8005 LAS: 78.35% UAS: 79.26%
+test:  Loss: 0.8194 LAS: 77.92% UAS: 79.04%
+0:00:24.297313s elapsed
 
 Epoch: 10 / 100:
-train: Loss: 0.4357 LAS: 87.05% UAS: 88.54%
-dev:   Loss: 0.8415 LAS: 78.41% UAS: 79.38%
-test:  Loss: 0.8512 LAS: 78.15% UAS: 79.35%
-0:00:24.329100s elapsed
+train: Loss: 0.4176 LAS: 87.64% UAS: 89.18%
+dev:   Loss: 0.8070 LAS: 78.73% UAS: 79.76%
+test:  Loss: 0.8269 LAS: 78.63% UAS: 79.77%
+0:00:24.360789s elapsed
 
 Epoch: 11 / 100:
-train: Loss: 0.3953 LAS: 87.95% UAS: 89.46%
-dev:   Loss: 0.8475 LAS: 78.58% UAS: 79.54%
-test:  Loss: 0.8656 LAS: 78.49% UAS: 79.56%
-0:00:24.585163s elapsed
+train: Loss: 0.3830 LAS: 88.41% UAS: 89.91%
+dev:   Loss: 0.8179 LAS: 78.82% UAS: 79.90%
+test:  Loss: 0.8454 LAS: 78.71% UAS: 79.82%
+0:00:24.322913s elapsed
 
 Epoch: 12 / 100:
-train: Loss: 0.3608 LAS: 89.14% UAS: 90.56%
-dev:   Loss: 0.8482 LAS: 79.17% UAS: 80.21%
-test:  Loss: 0.8640 LAS: 78.88% UAS: 79.90%
-0:00:24.434141s elapsed
+train: Loss: 0.3447 LAS: 89.59% UAS: 91.09%
+dev:   Loss: 0.8293 LAS: 79.26% UAS: 80.34%
+test:  Loss: 0.8481 LAS: 78.98% UAS: 80.19%
+0:00:24.463296s elapsed
 
 Epoch: 13 / 100:
-train: Loss: 0.3284 LAS: 89.89% UAS: 91.29%
-dev:   Loss: 0.8654 LAS: 79.32% UAS: 80.31%
-test:  Loss: 0.8827 LAS: 78.88% UAS: 79.97%
-0:00:24.260551s elapsed
+train: Loss: 0.3104 LAS: 90.47% UAS: 91.93%
+dev:   Loss: 0.8325 LAS: 79.54% UAS: 80.62%
+test:  Loss: 0.8555 LAS: 79.03% UAS: 80.28%
+0:00:24.304375s elapsed
 
 Epoch: 14 / 100:
-train: Loss: 0.2995 LAS: 90.85% UAS: 92.26%
-dev:   Loss: 0.8734 LAS: 79.60% UAS: 80.48%
-test:  Loss: 0.8962 LAS: 79.36% UAS: 80.28%
-0:00:24.431841s elapsed
+train: Loss: 0.2856 LAS: 91.35% UAS: 92.75%
+dev:   Loss: 0.8298 LAS: 79.64% UAS: 80.66%
+test:  Loss: 0.8595 LAS: 79.32% UAS: 80.46%
+0:00:24.316243s elapsed
 
 Epoch: 15 / 100:
-train: Loss: 0.2771 LAS: 91.38% UAS: 92.64%
-dev:   Loss: 0.9083 LAS: 79.57% UAS: 80.60%
-test:  Loss: 0.9144 LAS: 79.23% UAS: 80.25%
-0:00:24.509391s elapsed
+train: Loss: 0.2610 LAS: 91.98% UAS: 93.26%
+dev:   Loss: 0.8635 LAS: 79.72% UAS: 80.84%
+test:  Loss: 0.8873 LAS: 79.50% UAS: 80.69%
+0:00:24.421945s elapsed
 
 Epoch: 16 / 100:
-train: Loss: 0.2499 LAS: 92.12% UAS: 93.42%
-dev:   Loss: 0.9423 LAS: 79.52% UAS: 80.64%
-test:  Loss: 0.9482 LAS: 79.49% UAS: 80.47%
-0:00:24.467728s elapsed
+train: Loss: 0.2371 LAS: 92.69% UAS: 94.00%
+dev:   Loss: 0.8690 LAS: 80.06% UAS: 81.14%
+test:  Loss: 0.8962 LAS: 79.51% UAS: 80.68%
+0:00:24.680869s elapsed
 
 Epoch: 17 / 100:
-train: Loss: 0.2291 LAS: 92.70% UAS: 93.99%
-dev:   Loss: 0.9829 LAS: 79.66% UAS: 80.77%
-test:  Loss: 1.0028 LAS: 79.47% UAS: 80.46%
-0:00:24.249896s elapsed
+train: Loss: 0.2104 LAS: 93.43% UAS: 94.61%
+dev:   Loss: 0.9204 LAS: 80.07% UAS: 81.03%
+test:  Loss: 0.9423 LAS: 79.54% UAS: 80.75%
+0:00:24.592156s elapsed
 
 Epoch: 18 / 100:
-train: Loss: 0.2132 LAS: 93.32% UAS: 94.52%
-dev:   Loss: 0.9800 LAS: 79.79% UAS: 80.66%
-test:  Loss: 0.9860 LAS: 79.80% UAS: 80.69%
-0:00:24.153762s elapsed
+train: Loss: 0.1990 LAS: 93.84% UAS: 95.00%
+dev:   Loss: 0.9261 LAS: 79.89% UAS: 80.96%
+test:  Loss: 0.9366 LAS: 79.72% UAS: 80.94%
+0:00:24.434746s elapsed
 
 Epoch: 19 / 100:
-train: Loss: 0.1925 LAS: 93.96% UAS: 95.05%
-dev:   Loss: 0.9910 LAS: 79.86% UAS: 80.88%
-test:  Loss: 1.0100 LAS: 79.73% UAS: 80.72%
-0:00:24.462877s elapsed
+train: Loss: 0.1756 LAS: 94.55% UAS: 95.59%
+dev:   Loss: 0.9397 LAS: 80.08% UAS: 81.19%
+test:  Loss: 0.9732 LAS: 79.55% UAS: 80.70%
+0:00:24.526630s elapsed
 
 Epoch: 20 / 100:
-train: Loss: 0.1785 LAS: 94.33% UAS: 95.37%
-dev:   Loss: 1.0327 LAS: 79.72% UAS: 80.87%
-test:  Loss: 1.0487 LAS: 79.73% UAS: 80.75%
-0:00:24.426574s elapsed
+train: Loss: 0.1607 LAS: 95.03% UAS: 96.03%
+dev:   Loss: 0.9736 LAS: 80.10% UAS: 81.22%
+test:  Loss: 0.9926 LAS: 79.76% UAS: 80.99%
+0:00:24.380487s elapsed
 
 Epoch: 21 / 100:
-train: Loss: 0.1648 LAS: 94.68% UAS: 95.73%
-dev:   Loss: 1.0643 LAS: 79.76% UAS: 80.89%
-test:  Loss: 1.0909 LAS: 79.86% UAS: 80.92%
-0:00:24.443539s elapsed
+train: Loss: 0.1452 LAS: 95.42% UAS: 96.39%
+dev:   Loss: 0.9999 LAS: 80.01% UAS: 81.06%
+test:  Loss: 1.0153 LAS: 79.94% UAS: 81.09%
+0:00:24.396242s elapsed
 
 Epoch: 22 / 100:
-train: Loss: 0.1544 LAS: 95.09% UAS: 96.05%
-dev:   Loss: 1.0821 LAS: 80.10% UAS: 80.99%
-test:  Loss: 1.0956 LAS: 80.07% UAS: 80.94%
-0:00:24.371142s elapsed
+train: Loss: 0.1342 LAS: 95.82% UAS: 96.72%
+dev:   Loss: 1.0396 LAS: 79.88% UAS: 80.96%
+test:  Loss: 1.0584 LAS: 79.79% UAS: 80.84%
+0:00:24.549999s elapsed
 
 Epoch: 23 / 100:
-train: Loss: 0.1439 LAS: 95.31% UAS: 96.24%
-dev:   Loss: 1.1237 LAS: 80.00% UAS: 81.11%
-test:  Loss: 1.1180 LAS: 80.11% UAS: 81.13%
-0:00:24.522573s elapsed
+train: Loss: 0.1236 LAS: 96.09% UAS: 96.93%
+dev:   Loss: 1.0435 LAS: 80.18% UAS: 81.23%
+test:  Loss: 1.0656 LAS: 79.87% UAS: 80.97%
+0:00:24.571965s elapsed
 
 Epoch: 24 / 100:
-train: Loss: 0.1315 LAS: 95.82% UAS: 96.68%
-dev:   Loss: 1.1099 LAS: 79.84% UAS: 80.98%
-test:  Loss: 1.1199 LAS: 79.95% UAS: 81.02%
-0:00:24.422039s elapsed
+train: Loss: 0.1132 LAS: 96.46% UAS: 97.20%
+dev:   Loss: 1.0617 LAS: 80.26% UAS: 81.25%
+test:  Loss: 1.0929 LAS: 79.99% UAS: 81.04%
+0:00:24.572613s elapsed
 
 Epoch: 25 / 100:
-train: Loss: 0.1226 LAS: 96.09% UAS: 96.85%
-dev:   Loss: 1.1653 LAS: 79.88% UAS: 81.07%
-test:  Loss: 1.1920 LAS: 79.82% UAS: 80.85%
-0:00:24.524188s elapsed
+train: Loss: 0.1034 LAS: 96.80% UAS: 97.48%
+dev:   Loss: 1.0659 LAS: 79.94% UAS: 80.90%
+test:  Loss: 1.1067 LAS: 79.82% UAS: 80.90%
+0:00:24.407332s elapsed
 
 Epoch: 26 / 100:
-train: Loss: 0.1133 LAS: 96.35% UAS: 97.06%
-dev:   Loss: 1.2092 LAS: 79.80% UAS: 80.88%
-test:  Loss: 1.2063 LAS: 80.11% UAS: 81.11%
-0:00:24.306591s elapsed
+train: Loss: 0.0963 LAS: 97.05% UAS: 97.70%
+dev:   Loss: 1.1228 LAS: 80.00% UAS: 81.17%
+test:  Loss: 1.1461 LAS: 79.83% UAS: 80.91%
+0:00:24.553204s elapsed
 
 Epoch: 27 / 100:
-train: Loss: 0.1009 LAS: 96.65% UAS: 97.29%
-dev:   Loss: 1.3229 LAS: 80.02% UAS: 80.98%
-test:  Loss: 1.3530 LAS: 79.93% UAS: 80.88%
-0:00:24.314737s elapsed
+train: Loss: 0.0856 LAS: 97.38% UAS: 97.96%
+dev:   Loss: 1.1440 LAS: 80.25% UAS: 81.38%
+test:  Loss: 1.1847 LAS: 79.87% UAS: 81.00%
+0:00:24.377256s elapsed
 
 Epoch: 28 / 100:
-train: Loss: 0.0954 LAS: 96.89% UAS: 97.56%
-dev:   Loss: 1.3043 LAS: 80.04% UAS: 81.04%
-test:  Loss: 1.3310 LAS: 79.80% UAS: 80.88%
-0:00:24.463597s elapsed
+train: Loss: 0.0778 LAS: 97.59% UAS: 98.14%
+dev:   Loss: 1.1639 LAS: 80.08% UAS: 81.17%
+test:  Loss: 1.2115 LAS: 79.73% UAS: 80.90%
+0:00:24.416289s elapsed
 
 Epoch: 29 / 100:
-train: Loss: 0.0891 LAS: 97.15% UAS: 97.71%
-dev:   Loss: 1.2734 LAS: 80.31% UAS: 81.26%
-test:  Loss: 1.2899 LAS: 80.29% UAS: 81.11%
-0:00:24.320441s elapsed
+train: Loss: 0.0733 LAS: 97.80% UAS: 98.28%
+dev:   Loss: 1.1371 LAS: 80.34% UAS: 81.32%
+test:  Loss: 1.1834 LAS: 80.02% UAS: 81.14%
+0:00:24.364558s elapsed
 
 Epoch: 30 / 100:
-train: Loss: 0.0833 LAS: 97.29% UAS: 97.82%
-dev:   Loss: 1.3728 LAS: 80.13% UAS: 81.21%
-test:  Loss: 1.3893 LAS: 80.40% UAS: 81.21%
-0:00:24.393760s elapsed
+train: Loss: 0.0660 LAS: 97.94% UAS: 98.41%
+dev:   Loss: 1.2289 LAS: 80.05% UAS: 81.16%
+test:  Loss: 1.2658 LAS: 79.96% UAS: 81.07%
+0:00:24.361219s elapsed
 
 Epoch: 31 / 100:
-train: Loss: 0.0783 LAS: 97.50% UAS: 98.06%
-dev:   Loss: 1.3409 LAS: 80.13% UAS: 81.25%
-test:  Loss: 1.3799 LAS: 80.05% UAS: 80.97%
-0:00:24.498989s elapsed
+train: Loss: 0.0613 LAS: 98.15% UAS: 98.54%
+dev:   Loss: 1.2147 LAS: 80.18% UAS: 81.21%
+test:  Loss: 1.2681 LAS: 79.76% UAS: 80.94%
+0:00:24.434402s elapsed
 
 Epoch: 32 / 100:
-train: Loss: 0.0714 LAS: 97.74% UAS: 98.23%
-dev:   Loss: 1.3859 LAS: 80.08% UAS: 81.11%
-test:  Loss: 1.4228 LAS: 79.89% UAS: 80.87%
-0:00:24.349131s elapsed
+train: Loss: 0.0566 LAS: 98.26% UAS: 98.64%
+dev:   Loss: 1.2792 LAS: 80.21% UAS: 81.17%
+test:  Loss: 1.3117 LAS: 80.10% UAS: 81.16%
+0:00:24.397603s elapsed
 
 Epoch: 33 / 100:
-train: Loss: 0.0671 LAS: 97.76% UAS: 98.24%
-dev:   Loss: 1.4902 LAS: 80.22% UAS: 81.13%
-test:  Loss: 1.5032 LAS: 80.39% UAS: 81.15%
-0:00:24.433029s elapsed
+train: Loss: 0.0516 LAS: 98.46% UAS: 98.80%
+dev:   Loss: 1.2778 LAS: 80.23% UAS: 81.31%
+test:  Loss: 1.3212 LAS: 80.08% UAS: 81.15%
+0:00:24.377768s elapsed
 
 Epoch: 34 / 100:
-train: Loss: 0.0645 LAS: 97.95% UAS: 98.38%
-dev:   Loss: 1.4774 LAS: 80.24% UAS: 81.19%
-test:  Loss: 1.4821 LAS: 80.12% UAS: 81.06%
-0:00:24.473010s elapsed
+train: Loss: 0.0482 LAS: 98.53% UAS: 98.85%
+dev:   Loss: 1.2903 LAS: 80.42% UAS: 81.37%
+test:  Loss: 1.3255 LAS: 80.39% UAS: 81.29%
+0:00:24.299571s elapsed
 
 Epoch: 35 / 100:
-train: Loss: 0.0584 LAS: 98.21% UAS: 98.57%
-dev:   Loss: 1.4693 LAS: 80.08% UAS: 81.15%
-test:  Loss: 1.4634 LAS: 80.26% UAS: 81.24%
-0:00:24.475706s elapsed
+train: Loss: 0.0444 LAS: 98.65% UAS: 98.91%
+dev:   Loss: 1.3691 LAS: 80.15% UAS: 81.24%
+test:  Loss: 1.3846 LAS: 80.17% UAS: 81.16%
+0:00:24.526561s elapsed
 
 Epoch: 36 / 100:
-train: Loss: 0.0542 LAS: 98.28% UAS: 98.63%
-dev:   Loss: 1.5234 LAS: 80.18% UAS: 81.19%
-test:  Loss: 1.5132 LAS: 80.34% UAS: 81.29%
-0:00:24.440019s elapsed
+train: Loss: 0.0415 LAS: 98.79% UAS: 99.06%
+dev:   Loss: 1.3274 LAS: 80.36% UAS: 81.34%
+test:  Loss: 1.3675 LAS: 80.37% UAS: 81.32%
+0:00:24.564171s elapsed
 
 Epoch: 37 / 100:
-train: Loss: 0.0520 LAS: 98.39% UAS: 98.72%
-dev:   Loss: 1.5543 LAS: 80.21% UAS: 81.19%
-test:  Loss: 1.5593 LAS: 80.16% UAS: 81.13%
-0:00:24.446567s elapsed
+train: Loss: 0.0399 LAS: 98.82% UAS: 99.06%
+dev:   Loss: 1.3821 LAS: 80.33% UAS: 81.20%
+test:  Loss: 1.4140 LAS: 80.21% UAS: 81.17%
+0:00:24.357876s elapsed
 
 Epoch: 38 / 100:
-train: Loss: 0.0473 LAS: 98.54% UAS: 98.83%
-dev:   Loss: 1.6034 LAS: 80.00% UAS: 80.98%
-test:  Loss: 1.6015 LAS: 80.07% UAS: 81.10%
-0:00:24.251079s elapsed
+train: Loss: 0.0344 LAS: 98.99% UAS: 99.21%
+dev:   Loss: 1.3845 LAS: 80.50% UAS: 81.59%
+test:  Loss: 1.4443 LAS: 80.12% UAS: 81.10%
+0:00:24.392839s elapsed
 
 Epoch: 39 / 100:
-train: Loss: 0.0438 LAS: 98.64% UAS: 98.91%
-dev:   Loss: 1.6021 LAS: 80.23% UAS: 81.30%
-test:  Loss: 1.5855 LAS: 80.45% UAS: 81.35%
-0:00:24.314285s elapsed
+train: Loss: 0.0323 LAS: 99.10% UAS: 99.25%
+dev:   Loss: 1.3772 LAS: 80.26% UAS: 81.24%
+test:  Loss: 1.4056 LAS: 80.38% UAS: 81.42%
+0:00:24.423874s elapsed
 
-max score of dev is 80.31% at epoch 29
-the score of test at epoch 29 is 80.29%
-mean time of each epoch is 0:00:24.455781s
-0:15:53.775444s elapsed
+Epoch: 40 / 100:
+train: Loss: 0.0305 LAS: 99.11% UAS: 99.27%
+dev:   Loss: 1.4459 LAS: 80.31% UAS: 81.30%
+test:  Loss: 1.4735 LAS: 80.20% UAS: 81.23%
+0:00:24.360863s elapsed
+
+Epoch: 41 / 100:
+train: Loss: 0.0284 LAS: 99.20% UAS: 99.40%
+dev:   Loss: 1.4232 LAS: 80.44% UAS: 81.51%
+test:  Loss: 1.4740 LAS: 80.25% UAS: 81.34%
+0:00:24.507407s elapsed
+
+Epoch: 42 / 100:
+train: Loss: 0.0259 LAS: 99.28% UAS: 99.41%
+dev:   Loss: 1.4422 LAS: 80.63% UAS: 81.65%
+test:  Loss: 1.4937 LAS: 80.22% UAS: 81.25%
+0:00:24.455470s elapsed
+
+Epoch: 43 / 100:
+train: Loss: 0.0240 LAS: 99.35% UAS: 99.49%
+dev:   Loss: 1.4559 LAS: 80.30% UAS: 81.47%
+test:  Loss: 1.5150 LAS: 80.24% UAS: 81.33%
+0:00:24.594831s elapsed
+
+Epoch: 44 / 100:
+train: Loss: 0.0241 LAS: 99.33% UAS: 99.45%
+dev:   Loss: 1.4765 LAS: 80.54% UAS: 81.65%
+test:  Loss: 1.5358 LAS: 80.14% UAS: 81.13%
+0:00:24.616132s elapsed
+
+Epoch: 45 / 100:
+train: Loss: 0.0203 LAS: 99.47% UAS: 99.57%
+dev:   Loss: 1.5306 LAS: 80.18% UAS: 81.21%
+test:  Loss: 1.5692 LAS: 80.27% UAS: 81.23%
+0:00:24.620418s elapsed
+
+Epoch: 46 / 100:
+train: Loss: 0.0195 LAS: 99.50% UAS: 99.60%
+dev:   Loss: 1.5252 LAS: 80.37% UAS: 81.45%
+test:  Loss: 1.5865 LAS: 80.34% UAS: 81.17%
+0:00:24.411146s elapsed
+
+Epoch: 47 / 100:
+train: Loss: 0.0184 LAS: 99.54% UAS: 99.62%
+dev:   Loss: 1.5716 LAS: 80.46% UAS: 81.37%
+test:  Loss: 1.6277 LAS: 80.20% UAS: 81.07%
+0:00:24.466650s elapsed
+
+Epoch: 48 / 100:
+train: Loss: 0.0167 LAS: 99.57% UAS: 99.64%
+dev:   Loss: 1.6248 LAS: 80.50% UAS: 81.54%
+test:  Loss: 1.6895 LAS: 80.27% UAS: 81.09%
+0:00:24.436617s elapsed
+
+Epoch: 49 / 100:
+train: Loss: 0.0160 LAS: 99.61% UAS: 99.66%
+dev:   Loss: 1.5672 LAS: 80.38% UAS: 81.26%
+test:  Loss: 1.6273 LAS: 80.24% UAS: 81.16%
+0:00:24.360213s elapsed
+
+Epoch: 50 / 100:
+train: Loss: 0.0152 LAS: 99.62% UAS: 99.67%
+dev:   Loss: 1.5937 LAS: 80.29% UAS: 81.39%
+test:  Loss: 1.6612 LAS: 80.31% UAS: 81.21%
+0:00:24.507032s elapsed
+
+Epoch: 51 / 100:
+train: Loss: 0.0141 LAS: 99.65% UAS: 99.70%
+dev:   Loss: 1.6174 LAS: 80.40% UAS: 81.47%
+test:  Loss: 1.6950 LAS: 80.14% UAS: 81.09%
+0:00:24.479938s elapsed
+
+Epoch: 52 / 100:
+train: Loss: 0.0141 LAS: 99.63% UAS: 99.70%
+dev:   Loss: 1.7030 LAS: 80.45% UAS: 81.39%
+test:  Loss: 1.7649 LAS: 80.29% UAS: 81.22%
+0:00:24.380173s elapsed
+
+max score of dev is 80.63% at epoch 42
+the score of test at epoch 42 is 80.22%
+mean time of each epoch is 0:00:24.436957s
+0:21:10.721764s elapsed

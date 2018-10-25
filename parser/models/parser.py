@@ -28,19 +28,19 @@ class BiAffineParser(nn.Module):
                                  bidirectional=True)
 
         # MLP层
-        self.arc_mlp_h = MLP(n_lstm_hidden * 2,
-                             n_mlp_hidden,
-                             drop)
-        self.arc_mlp_d = MLP(n_lstm_hidden * 2,
-                             n_mlp_hidden,
-                             drop)
+        self.arc_mlp_h = MLP(n_input=n_lstm_hidden * 2,
+                             n_hidden=n_mlp_hidden,
+                             drop=drop)
+        self.arc_mlp_d = MLP(n_input=n_lstm_hidden * 2,
+                             n_hidden=n_mlp_hidden,
+                             drop=drop)
 
-        self.lab_mlp_h = MLP(n_lstm_hidden * 2,
-                             n_mlp_hidden,
-                             drop)
-        self.lab_mlp_d = MLP(n_lstm_hidden * 2,
-                             n_mlp_hidden,
-                             drop)
+        self.lab_mlp_h = MLP(n_input=n_lstm_hidden * 2,
+                             n_hidden=n_mlp_hidden,
+                             drop=drop)
+        self.lab_mlp_d = MLP(n_input=n_lstm_hidden * 2,
+                             n_hidden=n_mlp_hidden,
+                             drop=drop)
         # BiAffine layers
         self.arc_attn = BiAffineAttn(in_dim=n_mlp_hidden,
                                      out_channels=1,
