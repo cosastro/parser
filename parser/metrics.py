@@ -42,7 +42,7 @@ class AttachmentMethod(Metric):
         arc_mask = (pred_arcs == gold_arcs)
         label_mask = (pred_labels == gold_labels)
         self.correct_arcs += arc_mask.sum().item()
-        self.correct_labels += (arc_mask == label_mask).sum().item()
+        self.correct_labels += (arc_mask * label_mask).sum().item()
         self.total += len(pred_arcs)
 
     def __repr__(self):
