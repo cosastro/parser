@@ -5,14 +5,6 @@ from torch import nn
 
 
 class BiAffineAttn(nn.Module):
-    """
-    BiAffine Attention layer from https://arxiv.org/abs/1611.01734
-    Expects inputs as batch-first sequences [batch_size, seq_length, dim].
-
-    Returns score matrices as [batch_size, dim, dim] for arc attention
-    (n_channels=1), and score as [batch_size, n_channels, dim, dim]
-    for label attention (where n_channels=#labels).
-    """
 
     def __init__(self, n_input, n_channels, bias_head=True, bias_dep=True):
         super(BiAffineAttn, self).__init__()
@@ -49,10 +41,10 @@ class BiAffineAttn(nn.Module):
         return S.squeeze(1)
 
     @staticmethod
-    def add_ones_col(X):
+    def add_ones_col(x):
         """
         Add column of ones to each matrix in batch.
         """
-        b = torch.ones(X.shape[:-1], device=X.device).unsqueeze(-1)
+        b = torch.ones(x.shape[:-1], device=x.device).unsqueeze(-1)
 
-        return torch.cat([X, b], -1)
+        return torch.cat([x, b], -1)
