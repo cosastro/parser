@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import torch
-from torch import nn
+import torch.nn as nn
 
 
 class BiAffine(nn.Module):
