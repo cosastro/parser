@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from parser.modules import MLP, BiAffineAttn, CharLSTM
+from parser.modules import MLP, BiAffine, CharLSTM
 
 import torch
 import torch.nn as nn
@@ -42,26 +42,21 @@ class BiAffineParser(nn.Module):
                              n_hidden=n_mlp_hidden,
                              drop=drop)
         # BiAffine layers
-        self.arc_attn = BiAffineAttn(n_input=n_mlp_hidden,
-                                     n_channels=1,
-                                     bias_head=False,
-                                     bias_dep=True)
-        self.lab_attn = BiAffineAttn(n_input=n_mlp_hidden,
-                                     n_channels=n_labels,
-                                     bias_head=True,
-                                     bias_dep=True)
+        self.arc_attn = BiAffine(n_input=n_mlp_hidden,
+                                 bias_head=True,
+                                 bias_dep=False)
+        self.lab_attn = BiAffine(n_input=n_mlp_hidden,
+                                 n_out=n_labels,
+                                 bias_head=True,
+                                 bias_dep=True)
 
         self.drop = nn.Dropout(p=drop)
 
-        # init weights of all submodules recursively
-        self.apply(self.init_weights)
+        self.reset_parameters()
 
-    def init_weights(self, m):
-        if type(m) == nn.Linear:
-            nn.init.xavier_uniform_(m.weight)
-        if type(m) == nn.Embedding:
-            bias = (3. / m.weight.size(1)) ** 0.5
-            nn.init.uniform_(m.weight, -bias, bias)
+    def reset_parameters(self, m):
+        bias = (3. / self.embed.weight.size(1)) ** 0.5
+        nn.init.uniform_(self.embed.weight, -bias, bias)
 
     def load_pretrained(self, embed):
         self.embed = nn.Embedding.from_pretrained(embed, False)
@@ -89,7 +84,7 @@ class BiAffineParser(nn.Module):
         lab_d = self.lab_mlp_d(x)
 
         # Attention
-        s_arc = self.arc_attn(arc_h, arc_d).permute(0, 2, 1)
-        s_lab = self.lab_attn(lab_h, lab_d).permute(0, 3, 2, 1)
+        s_arc = self.arc_attn(arc_d, arc_h).permute(0, 2, 1)
+        s_lab = self.lab_attn(lab_d, lab_h).permute(0, 3, 2, 1)
 
         return s_arc, s_lab
