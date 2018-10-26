@@ -21,7 +21,7 @@ class CharLSTM(nn.Module):
 
         self.reset_parameters()
 
-    def reset_parameters(self, m):
+    def reset_parameters(self):
         bias = (3. / self.embed.weight.size(1)) ** 0.5
         nn.init.uniform_(self.embed.weight, -bias, bias)
 

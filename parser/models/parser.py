@@ -43,18 +43,18 @@ class BiAffineParser(nn.Module):
                              drop=drop)
         # BiAffine layers
         self.arc_attn = BiAffine(n_input=n_mlp_hidden,
-                                 bias_head=True,
-                                 bias_dep=False)
+                                 bias_x=True,
+                                 bias_y=False)
         self.lab_attn = BiAffine(n_input=n_mlp_hidden,
                                  n_out=n_labels,
-                                 bias_head=True,
-                                 bias_dep=True)
+                                 bias_x=True,
+                                 bias_y=True)
 
         self.drop = nn.Dropout(p=drop)
 
         self.reset_parameters()
 
-    def reset_parameters(self, m):
+    def reset_parameters(self):
         bias = (3. / self.embed.weight.size(1)) ** 0.5
         nn.init.uniform_(self.embed.weight, -bias, bias)
 
