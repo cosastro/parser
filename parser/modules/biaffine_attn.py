@@ -10,17 +10,17 @@ class BiAffineAttn(nn.Module):
     Expects inputs as batch-first sequences [batch_size, seq_length, dim].
 
     Returns score matrices as [batch_size, dim, dim] for arc attention
-    (out_channels=1), and score as [batch_size, out_channels, dim, dim]
-    for label attention (where out_channels=#labels).
+    (n_channels=1), and score as [batch_size, n_channels, dim, dim]
+    for label attention (where n_channels=#labels).
     """
 
-    def __init__(self, in_dim, out_channels, bias_head=True, bias_dep=True):
+    def __init__(self, n_input, n_channels, bias_head=True, bias_dep=True):
         super(BiAffineAttn, self).__init__()
         self.bias_head = bias_head
         self.bias_dep = bias_dep
-        self.U = nn.Parameter(torch.Tensor(out_channels,
-                                           in_dim + int(bias_head),
-                                           in_dim + int(bias_dep)))
+        self.U = nn.Parameter(torch.Tensor(n_channels,
+                                           n_input + int(bias_head),
+                                           n_input + int(bias_dep)))
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -45,7 +45,7 @@ class BiAffineAttn(nn.Module):
 
         S = Rh @ self.U @ torch.transpose(Rd, -1, -2)
 
-        # If out_channels == 1, squeeze [batch, 1, t, t] -> [batch, t, t]
+        # If n_channels == 1, squeeze [batch, 1, t, t] -> [batch, t, t]
         return S.squeeze(1)
 
     @staticmethod

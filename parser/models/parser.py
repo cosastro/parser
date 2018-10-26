@@ -42,12 +42,12 @@ class BiAffineParser(nn.Module):
                              n_hidden=n_mlp_hidden,
                              drop=drop)
         # BiAffine layers
-        self.arc_attn = BiAffineAttn(in_dim=n_mlp_hidden,
-                                     out_channels=1,
+        self.arc_attn = BiAffineAttn(n_input=n_mlp_hidden,
+                                     n_channels=1,
                                      bias_head=False,
                                      bias_dep=True)
-        self.lab_attn = BiAffineAttn(in_dim=n_mlp_hidden,
-                                     out_channels=n_labels,
+        self.lab_attn = BiAffineAttn(n_input=n_mlp_hidden,
+                                     n_channels=n_labels,
                                      bias_head=True,
                                      bias_dep=True)
 
