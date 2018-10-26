@@ -2,9 +2,8 @@
 
 import argparse
 import os
-from parser import Trainer
+from parser import BiAffineParser, Trainer
 from parser.data import Corpus, Embedding, TextDataset, Vocab, collate_fn
-from parser.models import BiAffineParser
 from parser.utils import init_embedding, numericalize
 
 import torch
