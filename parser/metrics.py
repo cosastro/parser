@@ -39,6 +39,10 @@ class AttachmentMethod(Metric):
         self.eps = eps
 
     def __call__(self, pred_arcs, pred_labels, gold_arcs, gold_labels):
+        pred_arcs = torch.cat([i[1:] for i in pred_arcs])
+        pred_labels = torch.cat([i[1:] for i in pred_labels])
+        gold_arcs = torch.cat([i[1:] for i in gold_arcs])
+        gold_labels = torch.cat([i[1:] for i in gold_labels])
         arc_mask = (pred_arcs == gold_arcs)
         label_mask = (pred_labels == gold_labels)
         self.correct_arcs += arc_mask.sum().item()

@@ -54,20 +54,13 @@ class Trainer(object):
         print(f"mean time of each epoch is {total_time / epoch}s")
         print(f"{total_time}s elapsed")
 
-    def get_loss(self, s_arc, s_lab, heads, labels, mask):
-        lens = mask.sum(1).tolist()
-        s_arc = torch.split(s_arc[mask], lens)
-        s_lab = torch.split(s_lab[mask], lens)
-        heads = torch.split(heads[mask], lens)
-        labels = torch.split(labels[mask], lens)
+    def get_loss(self, s_arc, s_lab, heads, labels):
         loss = 0
-        for arc, lab, head, label, length in zip(s_arc, s_lab, heads, labels, lens):
-            arc, lab = arc[:, :length], lab[:, :length]
-            lab = lab[torch.arange(length), head]
+        for arc, lab, head, label in zip(s_arc, s_lab, heads, labels):
             arc_loss = F.cross_entropy(arc, head, ignore_index=-1)
             label_loss = F.cross_entropy(lab, label, ignore_index=-1)
             loss += arc_loss + label_loss
-        loss /= len(lens)
+        loss /= len(s_arc)
 
         return loss
 
@@ -78,8 +71,18 @@ class Trainer(object):
             self.optimizer.zero_grad()
 
             mask = x.gt(0)
+            lens = mask.sum(1).tolist()
+            batch_size, seq_len = x.shape
+
             s_arc, s_lab = self.model(x, char_x)
-            loss = self.get_loss(s_arc, s_lab, heads, labels, mask)
+            s_lab = torch.stack([s_lab[i, torch.arange(seq_len), heads[i]]
+                                 for i in range(batch_size)])
+
+            s_arc = torch.split(s_arc[mask], lens)
+            s_lab = torch.split(s_lab[mask], lens)
+            heads = torch.split(heads[mask], lens)
+            labels = torch.split(labels[mask], lens)
+            loss = self.get_loss(s_arc, s_lab, heads, labels)
             loss.backward()
             nn.utils.clip_grad_norm_(self.model.parameters(), 5.0)
             self.optimizer.step()
@@ -94,18 +97,21 @@ class Trainer(object):
 
         for x, char_x, heads, labels in loader:
             mask = x.gt(0)
+            lens = mask.sum(1).tolist()
+            batch_size, seq_len = x.shape
+
             s_arc, s_lab = self.model(x, char_x)
-            loss += self.get_loss(s_arc, s_lab, heads, labels, mask)
-            s_arc = s_arc[mask]
-            s_lab = s_lab[mask]
-            heads = heads[mask]
-            labels = labels[mask]
-            pred_arcs = torch.argmax(s_arc, dim=1)
-            pred_labels = torch.argmax(
-                s_lab[torch.arange(len(s_lab)), heads], dim=1)
+            s_lab = torch.stack([s_lab[i, torch.arange(seq_len), heads[i]]
+                                 for i in range(batch_size)])
+
+            s_arc = torch.split(s_arc[mask], lens)
+            s_lab = torch.split(s_lab[mask], lens)
+            heads = torch.split(heads[mask], lens)
+            labels = torch.split(labels[mask], lens)
+            loss += self.get_loss(s_arc, s_lab, heads, labels)
+            pred_arcs = [torch.argmax(i, dim=1) for i in s_arc]
+            pred_labels = [torch.argmax(i, dim=1) for i in s_lab]
             metric(pred_arcs, pred_labels, heads, labels)
         loss /= len(loader)
 
         return loss, metric
-
-
