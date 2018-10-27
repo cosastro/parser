@@ -11,6 +11,7 @@ class Config(object):
     n_char_out = 300
     n_lstm_hidden = 150
     n_lstm_layers = 2
-    n_mlp_hidden = 150
+    n_mlp_arc = 200
+    n_mlp_lab = 100
     betas = (0.9, 0.9)
     epsilon = 1e-12

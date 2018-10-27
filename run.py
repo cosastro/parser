@@ -80,7 +80,8 @@ if __name__ == '__main__':
         'n_char_out': Config.n_char_out,
         'n_lstm_hidden': Config.n_lstm_hidden,
         'n_lstm_layers': Config.n_lstm_layers,
-        'n_mlp_hidden': Config.n_mlp_hidden,
+        'n_mlp_arc': Config.n_mlp_arc,
+        'n_mlp_lab': Config.n_mlp_lab,
         'n_labels': vocab.n_labels,
         'drop': args.drop
     }

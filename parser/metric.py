@@ -38,16 +38,23 @@ class AttachmentMethod(Metric):
         self.total = 0.0
         self.eps = eps
 
-    def __call__(self, pred_arcs, pred_labels, gold_arcs, gold_labels):
-        pred_arcs = torch.cat([i[1:] for i in pred_arcs])
-        pred_labels = torch.cat([i[1:] for i in pred_labels])
-        gold_arcs = torch.cat([i[1:] for i in gold_arcs])
-        gold_labels = torch.cat([i[1:] for i in gold_labels])
-        arc_mask = (pred_arcs == gold_arcs)
-        label_mask = (pred_labels == gold_labels)
+    def __call__(self, s_arc, s_lab, heads, labels, mask):
+        batch_size, maxlen = mask.size()
+        true_mask = mask.clone()
+        true_mask[:, 0] = true_mask.new_zeros(batch_size, dtype=torch.uint8)
+
+        heads = heads[true_mask]
+        labels = labels[true_mask]
+        word_num = true_mask.sum().item()
+
+        arc_mask = torch.argmax(s_arc[true_mask], dim=1) == heads
+
+        s_lab = s_lab[true_mask]
+        s_lab = s_lab[torch.arange(word_num), heads]
+        label_mask = torch.argmax(s_lab, dim=1) == labels
+        self.total += word_num
         self.correct_arcs += arc_mask.sum().item()
         self.correct_labels += (arc_mask * label_mask).sum().item()
-        self.total += len(pred_arcs)
 
     def __repr__(self):
         return f"LAS: {self.las:.2%} UAS: {self.uas:.2%}"
