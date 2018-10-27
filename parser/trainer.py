@@ -54,11 +54,20 @@ class Trainer(object):
         print(f"mean time of each epoch is {total_time / epoch}s")
         print(f"{total_time}s elapsed")
 
-    def get_loss(self, s_arc, s_lab, heads, labels):
-        arc_loss = F.cross_entropy(s_arc, heads)
-        s_lab = s_lab[torch.arange(len(s_lab)), heads]
-        label_loss = F.cross_entropy(s_lab, labels)
-        loss = arc_loss + label_loss
+    def get_loss(self, s_arc, s_lab, heads, labels, mask):
+        lens = mask.sum(1).tolist()
+        s_arc = torch.split(s_arc[mask], lens)
+        s_lab = torch.split(s_lab[mask], lens)
+        heads = torch.split(heads[mask], lens)
+        labels = torch.split(labels[mask], lens)
+        loss = 0
+        for arc, lab, head, label, length in zip(s_arc, s_lab, heads, labels, lens):
+            arc, lab = arc[:, :length], lab[:, :length]
+            lab = lab[torch.arange(length), head]
+            arc_loss = F.cross_entropy(arc, head, ignore_index=-1)
+            label_loss = F.cross_entropy(lab, label, ignore_index=-1)
+            loss += arc_loss + label_loss
+        loss /= len(lens)
 
         return loss
 
@@ -70,8 +79,7 @@ class Trainer(object):
 
             mask = x.gt(0)
             s_arc, s_lab = self.model(x, char_x)
-            loss = self.get_loss(s_arc[mask], s_lab[mask],
-                                 heads[mask], labels[mask])
+            loss = self.get_loss(s_arc, s_lab, heads, labels, mask)
             loss.backward()
             nn.utils.clip_grad_norm_(self.model.parameters(), 5.0)
             self.optimizer.step()
@@ -87,11 +95,11 @@ class Trainer(object):
         for x, char_x, heads, labels in loader:
             mask = x.gt(0)
             s_arc, s_lab = self.model(x, char_x)
+            loss += self.get_loss(s_arc, s_lab, heads, labels, mask)
             s_arc = s_arc[mask]
             s_lab = s_lab[mask]
             heads = heads[mask]
             labels = labels[mask]
-            loss += self.get_loss(s_arc, s_lab, heads, labels)
             pred_arcs = torch.argmax(s_arc, dim=1)
             pred_labels = torch.argmax(
                 s_lab[torch.arange(len(s_lab)), heads], dim=1)
@@ -101,26 +109,3 @@ class Trainer(object):
         return loss, metric
 
 
-def get_arc_loss(s_arc, arcs):
-    """
-    s_arc is a tensor of [batch, heads, deps]
-    Arcs is a np array with columns [batch_idx, head, dep, label]
-    Calculates softmax over columns in s_arc, s_arc[b,:,i] = P(head | dep=i)
-    """
-    logits = s_arc.transpose(-1, -2)[arcs[:, 0], arcs[:, 2], :]
-    heads = torch.from_numpy(arcs[:, 1])
-
-    return F.cross_entropy(logits, heads)
-
-
-def get_label_loss(S_label, arcs):
-    """
-    S_label is a tensor of shape [batch, n_labels, heads, deps]
-    arc_labels is a list of tuples (batch_idx, head_idx, dep_idx, label)
-    Calculates softmax over second dimension of S_label,
-    S_label[b, :, i, j] = P(label | head=i, dep=j).
-    """
-    logits = S_label.permute(0, 2, 3, 1)[
-        arcs[:, 0], arcs[:, 1], arcs[:, 2], :]
-    labels = torch.from_numpy(arcs[:, 3])
-    return F.cross_entropy(logits, labels)

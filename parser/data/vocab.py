@@ -7,10 +7,12 @@ import torch.nn as nn
 class Vocab(object):
     PAD = '<PAD>'
     UNK = '<UNK>'
+    ROOT = '<ROOT>'
 
     def __init__(self, words, labels):
         self.pad_index = 0
         self.unk_index = 1
+        self.root_index = 2
 
         self.words = [self.PAD, self.UNK] + sorted(words)
         self.chars = [self.PAD, self.UNK] + sorted(set(''.join(words)))

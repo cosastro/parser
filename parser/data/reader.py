@@ -6,6 +6,7 @@ import torch
 
 
 class Corpus(object):
+    ROOT = '<ROOT>'
 
     def __init__(self, fname):
         super(Corpus, self).__init__()
@@ -30,12 +31,11 @@ class Corpus(object):
         for i, line in enumerate(lines):
             if len(lines[i]) <= 1:
                 cols = list(zip(*[l.split() for l in lines[start:i]]))
+                word_seqs.append([cls.ROOT] + list(cols[1]))
+                head_seqs.append(
+                    torch.tensor([-1] + list(map(int, cols[6]))).long())
+                label_seqs.append(['HED'] + list(cols[7]))
                 start = i + 1
-                while start < len(lines) and len(lines[start]) <= 1:
-                    start += 1
-                word_seqs.append(list(cols[1]))
-                head_seqs.append(torch.tensor(list(map(int, cols[6]))).long())
-                label_seqs.append(list(cols[7]))
 
         return word_seqs, head_seqs, label_seqs
 
