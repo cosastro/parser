@@ -48,7 +48,7 @@ class BiAffineParser(nn.Module):
                              n_hidden=n_mlp_lab,
                              drop=drop)
 
-        # the biAffine layers
+        # the BiAffine layers
         self.arc_attn = BiAffine(n_input=n_mlp_arc,
                                  bias_x=True,
                                  bias_y=False)
@@ -80,7 +80,6 @@ class BiAffineParser(nn.Module):
         char_x = self.char_lstm(char_x[mask])
         char_x = pad_sequence(torch.split(char_x, lens.tolist()), True)
         x, char_x = self.embed_drop(x, char_x)
-
         # concatenate the word and char representations
         x = torch.cat((x, char_x), dim=-1)
 
