@@ -22,7 +22,7 @@ if __name__ == '__main__':
                         help='set the size of batch')
     parser.add_argument('--epochs', action='store', default=1000, type=int,
                         help='set the max num of epochs')
-    parser.add_argument('--patience', action='store', default=50, type=int,
+    parser.add_argument('--patience', action='store', default=100, type=int,
                         help='set the num of epochs to be patient')
     parser.add_argument('--lr', action='store', default=2e-3, type=float,
                         help='set the learning rate of training')

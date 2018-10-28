@@ -8,7 +8,7 @@ class Config(object):
     fembed = 'data/giga.100.txt'
     n_embed = 100
     n_char_embed = 50
-    n_char_out = 300
+    n_char_out = 100
     n_lstm_hidden = 150
     n_lstm_layers = 2
     n_mlp_arc = 200

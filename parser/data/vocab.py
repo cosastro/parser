@@ -7,7 +7,7 @@ import torch.nn as nn
 class Vocab(object):
     PAD = '<PAD>'
     UNK = '<UNK>'
-    ROOT = '<ROOT>'
+    SOS = '<SOS>'
 
     def __init__(self, words, labels):
         self.pad_index = 0
@@ -63,7 +63,8 @@ class Vocab(object):
 
         return labels
 
-    def read_embeddings(self, embed, unk=None, init_unk=nn.init.normal_):
+    def read_embeddings(self, embed, unk=None, smooth=True,
+                        init_unk=nn.init.normal_):
         words = embed.words
         if unk:
             words[words.index(unk)] = self.UNK
@@ -78,6 +79,8 @@ class Vocab(object):
                 self.embeddings[i] = embed[word.lower()]
             else:
                 init_unk(self.embeddings[i])
+        if smooth:
+            self.embeddings /= torch.std(self.embeddings)
 
     def extend(self, words):
         self.words.extend({w for w in words if w not in self.wdict})
