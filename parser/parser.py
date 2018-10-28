@@ -44,7 +44,7 @@ class BiAffineParser(nn.Module):
         self.mlp_lab_d = MLP(n_input=n_lstm_hidden * 2,
                              n_hidden=n_mlp_lab,
                              drop=drop)
-        # BiAffine layers
+        # the biAffine layers
         self.arc_attn = BiAffine(n_input=n_mlp_arc,
                                  bias_x=True,
                                  bias_y=False)
