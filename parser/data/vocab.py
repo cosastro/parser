@@ -64,7 +64,7 @@ class Vocab(object):
         return labels
 
     def read_embeddings(self, embed, unk=None, smooth=True,
-                        init_unk=nn.init.normal_):
+                        init_unk=nn.init.zeros_):
         words = embed.words
         if unk:
             words[words.index(unk)] = self.UNK
