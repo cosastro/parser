@@ -60,10 +60,9 @@ class Trainer(object):
             self.optimizer.zero_grad()
 
             mask = x.gt(0)
-            lens = mask.sum(1).tolist()
-            batch_size, seq_len = x.shape
-
             s_arc, s_lab = self.model(x, char_x)
+            # ignore the first token of each sentence
+            mask[:, 0] = 0
 
             loss = self.model.get_loss(s_arc, s_lab, heads, labels, mask)
             loss.backward()
@@ -80,10 +79,10 @@ class Trainer(object):
 
         for x, char_x, heads, labels in loader:
             mask = x.gt(0)
-            lens = mask.sum(1).tolist()
-            batch_size, seq_len = x.shape
-
             s_arc, s_lab = self.model(x, char_x)
+            # ignore the first token of each sentence
+            mask[:, 0] = 0
+
             loss += self.model.get_loss(s_arc, s_lab, heads, labels, mask)
             metric(s_arc, s_lab, heads, labels, mask)
         loss /= len(loader)

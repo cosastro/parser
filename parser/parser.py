@@ -84,33 +84,35 @@ class BiAffineParser(nn.Module):
 
         x = self.lstm(x, mask)
 
-        # MLPs
+        # apply MLPs to the LSTM output states
         arc_h = self.mlp_arc_h(x)
         arc_d = self.mlp_arc_d(x)
         lab_h = self.mlp_lab_h(x)
         lab_d = self.mlp_lab_d(x)
 
-        # Attention
+        # get arc and label scores from the bilinear attention
+        # [batch_size, seq_len, seq_len]
         s_arc = self.arc_attn(arc_d, arc_h)
+        # [batch_size, seq_len, seq_len, n_labels]
         s_lab = self.lab_attn(lab_d, lab_h).permute(0, 2, 3, 1)
+        # set the scores that exceed the length of each sentence to -inf
+        s_arc.masked_fill_((1 - mask).unsqueeze(1), float('-inf'))
 
         return s_arc, s_lab
 
     def get_loss(self, s_arc, s_lab, heads, labels, mask):
-        criterion = nn.CrossEntropyLoss(reduction='sum')
-        true_mask = mask.clone()
-        # ignore the first token of each sentence
-        true_mask[:, 0] = 0
+        criterion = nn.CrossEntropyLoss()
 
-        heads = heads[true_mask]
-        labels = labels[true_mask]
-        word_num = true_mask.sum()
+        heads = heads[mask]
+        labels = labels[mask]
+        word_num = len(heads)
 
-        s_arc.masked_fill_((1-mask).unsqueeze(1), -10000)
-        arc_loss = criterion(s_arc[true_mask], heads)
+        arc_loss = criterion(s_arc[mask], heads)
 
-        s_lab = s_lab[true_mask]
+        s_lab = s_lab[mask]
         s_lab = s_lab[torch.arange(word_num), heads]
         label_loss = criterion(s_lab, labels)
 
-        return (arc_loss + label_loss) / word_num.float()
+        loss = arc_loss + label_loss
+
+        return loss

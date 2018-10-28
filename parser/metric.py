@@ -39,17 +39,13 @@ class AttachmentMethod(Metric):
         self.eps = eps
 
     def __call__(self, s_arc, s_lab, heads, labels, mask):
-        true_mask = mask.clone()
-        # ignore the first token of each sentence
-        true_mask[:, 0] = 0
+        heads = heads[mask]
+        labels = labels[mask]
+        word_num = len(heads)
 
-        heads = heads[true_mask]
-        labels = labels[true_mask]
-        word_num = true_mask.sum().item()
+        arc_mask = torch.argmax(s_arc[mask], dim=1) == heads
 
-        arc_mask = torch.argmax(s_arc[true_mask], dim=1) == heads
-
-        s_lab = s_lab[true_mask]
+        s_lab = s_lab[mask]
         s_lab = s_lab[torch.arange(word_num), heads]
         label_mask = torch.argmax(s_lab, dim=1) == labels
         self.total += word_num
