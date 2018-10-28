@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from parser.modules import MLP, BiAffine, CharLSTM, ParserLSTM
+from parser.modules.dropout import IndependentDropout, SharedDropout
 
 import torch
 import torch.nn as nn
@@ -20,6 +21,7 @@ class BiAffineParser(nn.Module):
         self.char_lstm = CharLSTM(n_char=n_char,
                                   n_embed=n_char_embed,
                                   n_out=n_char_out)
+        self.embed_drop = IndependentDropout(p=drop)
 
         # the word-lstm layer
         self.lstm = ParserLSTM(input_size=n_embed + n_char_out,
@@ -29,6 +31,7 @@ class BiAffineParser(nn.Module):
                                dropout_in=drop,
                                dropout_out=drop,
                                bidirectional=True)
+        self.lstm_drop = SharedDropout(p=drop)
 
         # the MLP layers
         self.mlp_arc_h = MLP(n_input=n_lstm_hidden * 2,
@@ -44,6 +47,7 @@ class BiAffineParser(nn.Module):
         self.mlp_lab_d = MLP(n_input=n_lstm_hidden * 2,
                              n_hidden=n_mlp_lab,
                              drop=drop)
+
         # the biAffine layers
         self.arc_attn = BiAffine(n_input=n_mlp_arc,
                                  bias_x=True,
@@ -52,8 +56,6 @@ class BiAffineParser(nn.Module):
                                  n_out=n_labels,
                                  bias_x=True,
                                  bias_y=True)
-
-        self.drop = nn.Dropout(p=drop)
 
         self.apply(self.init_weights)
 
@@ -77,12 +79,13 @@ class BiAffineParser(nn.Module):
         x = self.embed(x)
         char_x = self.char_lstm(char_x[mask])
         char_x = pad_sequence(torch.split(char_x, lens.tolist()), True)
+        x, char_x = self.embed_drop(x, char_x)
 
         # concatenate the word and char representations
         x = torch.cat((x, char_x), dim=-1)
-        x = self.drop(x)
 
         x = self.lstm(x, mask)
+        x = self.lstm_drop(x)
 
         # apply MLPs to the LSTM output states
         arc_h = self.mlp_arc_h(x)

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from parser.modules.dropout import SharedDropout
+
 import torch.nn as nn
 
 
@@ -10,7 +12,7 @@ class MLP(nn.Module):
 
         self.linear = nn.Linear(n_input, n_hidden)
         self.activation = nn.LeakyReLU(negative_slope=0.1)
-        self.drop = nn.Dropout(drop)
+        self.drop = SharedDropout(drop)
 
         self.reset_parameters()
 

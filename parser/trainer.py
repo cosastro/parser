@@ -5,7 +5,6 @@ from parser.metric import AttachmentMethod
 
 import torch
 import torch.nn as nn
-import torch.optim as optim
 
 
 class Trainer(object):
