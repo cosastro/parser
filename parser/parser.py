@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from parser.modules import MLP, BiAffine, CharLSTM
+from parser.modules import MLP, BiAffine, CharLSTM, ParserLSTM
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn.utils.rnn import pack_sequence, pad_packed_sequence
+from torch.nn.utils.rnn import pad_sequence
 
 
 class BiAffineParser(nn.Module):
@@ -22,12 +22,13 @@ class BiAffineParser(nn.Module):
                                   n_out=n_char_out)
 
         # the word-lstm layer
-        self.word_lstm = nn.LSTM(input_size=n_embed + n_char_out,
-                                 hidden_size=n_lstm_hidden,
-                                 num_layers=n_lstm_layers,
-                                 batch_first=True,
-                                 dropout=drop,
-                                 bidirectional=True)
+        self.lstm = ParserLSTM(input_size=n_embed + n_char_out,
+                               hidden_size=n_lstm_hidden,
+                               num_layers=n_lstm_layers,
+                               batch_first=True,
+                               dropout_in=drop,
+                               dropout_out=drop,
+                               bidirectional=True)
 
         # MLP层
         self.mlp_arc_h = MLP(n_input=n_lstm_hidden * 2,
@@ -57,10 +58,10 @@ class BiAffineParser(nn.Module):
         self.apply(self.init_weights)
 
     def init_weights(self, m):
-        if type(m) == nn.LSTM:
-            for i in m.parameters():
-                if len(i.shape) > 1:
-                    nn.init.orthogonal_(i)
+        # if type(m) == nn.LSTM:
+        #     for i in m.parameters():
+        #         if len(i.shape) > 1:
+        #             nn.init.orthogonal_(i)
         if type(m) == nn.Embedding:
             bias = (3. / m.weight.size(1)) ** 0.5
             nn.init.uniform_(m.weight, -bias, bias)
@@ -73,16 +74,15 @@ class BiAffineParser(nn.Module):
         mask = x.gt(0)
         lens = mask.sum(dim=1)
         # get outputs from embedding layers
-        x = self.embed(x[mask])
+        x = self.embed(x)
         char_x = self.char_lstm(char_x[mask])
+        char_x = pad_sequence(torch.split(char_x, lens.tolist()), True)
 
         # concatenate the word and char representations
         x = torch.cat((x, char_x), dim=-1)
         x = self.drop(x)
 
-        x = pack_sequence(torch.split(x, lens.tolist()))
-        x, _ = self.word_lstm(x)
-        x, _ = pad_packed_sequence(x, True)
+        x = self.lstm(x, mask)
 
         # MLPs
         arc_h = self.mlp_arc_h(x)
