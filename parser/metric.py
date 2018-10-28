@@ -40,9 +40,10 @@ class AttachmentMethod(Metric):
 
     def __call__(self, s_arc, s_lab, heads, labels, mask):
         s_arc = s_arc[mask]
-        s_lab = s_lab[mask][torch.arange(len(s_arc)), heads]
+        s_lab = s_lab[mask]
         heads = heads[mask]
         labels = labels[mask]
+        s_lab = s_lab[torch.arange(len(s_arc)), heads]
 
         arc_mask = (torch.argmax(s_arc, dim=1) == heads)
         lab_mask = (torch.argmax(s_lab, dim=1) == labels)
