@@ -101,18 +101,13 @@ class BiAffineParser(nn.Module):
         return s_arc, s_lab
 
     def get_loss(self, s_arc, s_lab, heads, labels, mask):
-        criterion = nn.CrossEntropyLoss()
-
+        s_arc = s_arc[mask]
+        s_lab = s_lab[mask][torch.arange(len(s_arc)), heads]
         heads = heads[mask]
         labels = labels[mask]
-        word_num = len(heads)
 
-        arc_loss = criterion(s_arc[mask], heads)
-
-        s_lab = s_lab[mask]
-        s_lab = s_lab[torch.arange(word_num), heads]
-        label_loss = criterion(s_lab, labels)
-
-        loss = arc_loss + label_loss
+        arc_loss = F.cross_entropy(s_arc, heads)
+        lab_loss = F.cross_entropy(s_lab, labels)
+        loss = arc_loss + lab_loss
 
         return loss

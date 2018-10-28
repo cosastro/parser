@@ -39,18 +39,17 @@ class AttachmentMethod(Metric):
         self.eps = eps
 
     def __call__(self, s_arc, s_lab, heads, labels, mask):
+        s_arc = s_arc[mask]
+        s_lab = s_lab[mask][torch.arange(len(s_arc)), heads]
         heads = heads[mask]
         labels = labels[mask]
-        word_num = len(heads)
 
-        arc_mask = torch.argmax(s_arc[mask], dim=1) == heads
+        arc_mask = (torch.argmax(s_arc, dim=1) == heads)
+        lab_mask = (torch.argmax(s_lab, dim=1) == labels)
 
-        s_lab = s_lab[mask]
-        s_lab = s_lab[torch.arange(word_num), heads]
-        label_mask = torch.argmax(s_lab, dim=1) == labels
-        self.total += word_num
+        self.total += len(s_arc)
         self.correct_arcs += arc_mask.sum().item()
-        self.correct_labels += (arc_mask * label_mask).sum().item()
+        self.correct_labels += (arc_mask * lab_mask).sum().item()
 
     def __repr__(self):
         return f"LAS: {self.las:.2%} UAS: {self.uas:.2%}"
