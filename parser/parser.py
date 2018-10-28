@@ -30,7 +30,7 @@ class BiAffineParser(nn.Module):
                                dropout_out=drop,
                                bidirectional=True)
 
-        # MLP层
+        # the MLP layers
         self.mlp_arc_h = MLP(n_input=n_lstm_hidden * 2,
                              n_hidden=n_mlp_arc,
                              drop=drop)
