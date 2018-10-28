@@ -35,13 +35,11 @@ class IndependentDropout(nn.Module):
     def forward(self, x, y):
         if self.training:
             x_mask = torch.bernoulli(x.new_full(x.shape[:2], 1 - self.p))
-            y_mask = torch.bernoulli(x.new_full(x.shape[:2], 1 - self.p))
+            y_mask = torch.bernoulli(y.new_full(y.shape[:2], 1 - self.p))
             scale = 3.0 / (2.0 * x_mask + y_mask + 1e-12)
             x_mask *= scale
             y_mask *= scale
-            x_mask = x_mask.unsqueeze(dim=2)
-            y_mask = y_mask.unsqueeze(dim=2)
-            x = x * x_mask
-            y = y * y_mask
+            x = x * x_mask.unsqueeze(dim=2)
+            y = y * y_mask.unsqueeze(dim=2)
 
         return x, y
