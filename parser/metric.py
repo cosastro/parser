@@ -39,9 +39,9 @@ class AttachmentMethod(Metric):
         self.eps = eps
 
     def __call__(self, s_arc, s_lab, heads, labels, mask):
-        batch_size, maxlen = mask.size()
         true_mask = mask.clone()
-        true_mask[:, 0] = true_mask.new_zeros(batch_size, dtype=torch.uint8)
+        # ignore the first token of each sentence
+        true_mask[:, 0] = 0
 
         heads = heads[true_mask]
         labels = labels[true_mask]

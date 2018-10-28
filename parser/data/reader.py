@@ -32,8 +32,7 @@ class Corpus(object):
             if len(lines[i]) <= 1:
                 cols = list(zip(*[l.split() for l in lines[start:i]]))
                 word_seqs.append([cls.ROOT] + list(cols[1]))
-                head_seqs.append(
-                    torch.tensor([-1] + list(map(int, cols[6]))).long())
+                head_seqs.append([0] + list(map(int, cols[6])))
                 label_seqs.append(['HED'] + list(cols[7]))
                 start = i + 1
 

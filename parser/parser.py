@@ -97,20 +97,20 @@ class BiAffineParser(nn.Module):
         return s_arc, s_lab
 
     def get_loss(self, s_arc, s_lab, heads, labels, mask):
-        batch_size, maxlen = mask.size()
-        loss = nn.CrossEntropyLoss(reduction='sum')
+        criterion = nn.CrossEntropyLoss(reduction='sum')
         true_mask = mask.clone()
-        true_mask[:, 0] = true_mask.new_zeros(batch_size, dtype=torch.uint8)
+        # ignore the first token of each sentence
+        true_mask[:, 0] = 0
 
         heads = heads[true_mask]
         labels = labels[true_mask]
         word_num = true_mask.sum()
 
         s_arc.masked_fill_((1-mask).unsqueeze(1), -10000)
-        arc_loss = loss(s_arc[true_mask], heads)
+        arc_loss = criterion(s_arc[true_mask], heads)
 
         s_lab = s_lab[true_mask]
         s_lab = s_lab[torch.arange(word_num), heads]
-        label_loss = loss(s_lab, labels)
+        label_loss = criterion(s_lab, labels)
 
         return (arc_loss + label_loss) / word_num.float()
