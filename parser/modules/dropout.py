@@ -15,8 +15,8 @@ class SharedDropout(nn.Module):
 
     def forward(self, x):
         if self.training:
-            batch_size, seq_len, hidden_size = x.size()
-            mask = x.new_full((batch_size, hidden_size), 1 - self.p)
+            batch_size, seq_len = x.shape[:2]
+            mask = x.new_full((batch_size, *x.shape[2:]), 1 - self.p)
             mask = torch.bernoulli(mask) / (1 - self.p)
             x = x * mask.unsqueeze(1)
 
