@@ -4,7 +4,7 @@ import argparse
 import os
 from parser import BiAffineParser, Trainer
 from parser.data import Corpus, Embedding, TextDataset, Vocab, collate_fn
-from parser.utils import numericalize
+from parser.utils import init_embedding, numericalize
 
 import torch
 import torch.optim as optim
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     test = Corpus(fname=Config.ftest)
     embed = Embedding(fname=Config.fembed)
     vocab = Vocab.from_corpus(corpus=train, min_freq=2)
-    vocab.read_embeddings(embed=embed)
+    vocab.read_embeddings(embed=embed, init_unk=init_embedding)
     print(vocab)
 
     print("Load the dataset")
