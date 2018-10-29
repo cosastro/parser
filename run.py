@@ -4,7 +4,7 @@ import argparse
 import os
 from parser import BiAffineParser, Trainer
 from parser.data import Corpus, Embedding, TextDataset, Vocab, collate_fn
-from parser.utils import init_embedding, numericalize
+from parser.utils import numericalize
 
 import torch
 import torch.optim as optim
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     test = Corpus(fname=Config.ftest)
     embed = Embedding(fname=Config.fembed)
     vocab = Vocab.from_corpus(corpus=train, min_freq=2)
-    vocab.read_embeddings(embed=embed, init_unk=init_embedding)
+    vocab.read_embeddings(embed=embed)
     print(vocab)
 
     print("Load the dataset")
@@ -73,9 +73,7 @@ if __name__ == '__main__':
 
     print("Create Neural Network")
     params = {
-        'n_vocab': vocab.n_words,
         'n_embed': Config.n_embed,
-        'n_char': vocab.n_chars,
         'n_char_embed': Config.n_char_embed,
         'n_char_out': Config.n_char_out,
         'n_lstm_hidden': Config.n_lstm_hidden,
@@ -87,8 +85,7 @@ if __name__ == '__main__':
     }
     for k, v in params.items():
         print(f"  {k}: {v}")
-    model = BiAffineParser(**params)
-    model.load_pretrained(vocab.embeddings)
+    model = BiAffineParser(vocab, **params)
     if torch.cuda.is_available():
         model = model.cuda()
     print(f"{model}\n")

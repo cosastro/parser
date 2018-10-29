@@ -10,15 +10,18 @@ from torch.nn.utils.rnn import pad_sequence
 
 
 class BiAffineParser(nn.Module):
-    def __init__(self, n_vocab, n_embed, n_char, n_char_embed, n_char_out,
-                 n_lstm_hidden, n_lstm_layers, n_mlp_arc, n_mlp_lab, n_labels,
-                 drop):
+    def __init__(self, vocab,
+                 n_embed, n_char_embed, n_char_out,
+                 n_lstm_hidden, n_lstm_layers, n_mlp_arc, n_mlp_lab,
+                 n_labels, drop):
         super(BiAffineParser, self).__init__()
 
+        self.vocab = vocab
         # the embedding layer
-        self.embed = nn.Embedding(n_vocab, n_embed)
+        self.embed = nn.Embedding(vocab.n_train_words, n_embed)
+        self.pretrained = nn.Embedding.from_pretrained(vocab.embeddings)
         # the char-lstm layer
-        self.char_lstm = CharLSTM(n_char=n_char,
+        self.char_lstm = CharLSTM(n_char=vocab.n_chars,
                                   n_embed=n_char_embed,
                                   n_out=n_char_out)
         self.embed_drop = IndependentDropout(p=drop)
@@ -57,31 +60,26 @@ class BiAffineParser(nn.Module):
                                  bias_x=True,
                                  bias_y=True)
 
-        self.apply(self.init_weights)
+        self.reset_parameters()
 
-    def init_weights(self, m):
-        # if type(m) == nn.LSTM:
-        #     for i in m.parameters():
-        #         if len(i.shape) > 1:
-        #             nn.init.orthogonal_(i)
-        if type(m) == nn.Embedding:
-            bias = (3. / m.weight.size(1)) ** 0.5
-            nn.init.uniform_(m.weight, -bias, bias)
-
-    def load_pretrained(self, embed):
-        self.embed = nn.Embedding.from_pretrained(embed, False)
+    def reset_parameters(self):
+        bias = (3. / self.embed.weight.size(1)) ** 0.5
+        nn.init.uniform_(self.embed.weight, -bias, bias)
 
     def forward(self, x, char_x):
         # get the mask and lengths of given batch
         mask = x.gt(0)
         lens = mask.sum(dim=1)
         # get outputs from embedding layers
-        x = self.embed(x)
+        embed_x = self.pretrained(x)
+        embed_x += self.embed(x.masked_fill_(x >= self.vocab.n_train_words,
+                                             self.vocab.unk_index))
+
         char_x = self.char_lstm(char_x[mask])
         char_x = pad_sequence(torch.split(char_x, lens.tolist()), True)
-        x, char_x = self.embed_drop(x, char_x)
+        embed_x, char_x = self.embed_drop(embed_x, char_x)
         # concatenate the word and char representations
-        x = torch.cat((x, char_x), dim=-1)
+        x = torch.cat((embed_x, char_x), dim=-1)
 
         x = self.lstm(x, mask)
         x = self.lstm_drop(x)

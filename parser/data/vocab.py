@@ -11,7 +11,6 @@ class Vocab(object):
     def __init__(self, words, labels):
         self.pad_index = 0
         self.unk_index = 1
-        self.root_index = 2
 
         self.words = [self.PAD, self.UNK] + sorted(words)
         self.chars = [self.PAD, self.UNK] + sorted(set(''.join(words)))
@@ -24,6 +23,7 @@ class Vocab(object):
         self.n_words = len(self.words)
         self.n_chars = len(self.chars)
         self.n_labels = len(self.labels)
+        self.n_train_words = self.n_words
 
     def __repr__(self):
         info = f"{self.__class__.__name__}(\n"
@@ -62,9 +62,10 @@ class Vocab(object):
 
         return labels
 
-    def read_embeddings(self, embed, unk=None, smooth=True,
-                        init_unk=nn.init.zeros_):
+    def read_embeddings(self, embed, unk=None, smooth=True):
         words = embed.words
+        # if the UNK token has existed in pretrained vocab,
+        # then replace it with a self-defined one
         if unk:
             words[words.index(unk)] = self.UNK
 
@@ -77,7 +78,7 @@ class Vocab(object):
             elif word.lower() in embed:
                 self.embeddings[i] = embed[word.lower()]
             else:
-                init_unk(self.embeddings[i])
+                self.embeddings[i].zero_()
         if smooth:
             self.embeddings /= torch.std(self.embeddings)
 
