@@ -7,51 +7,49 @@ import torch.nn as nn
 class ParserLSTM(nn.Module):
 
     def __init__(self, input_size, hidden_size, num_layers=1,
-                 bidirectional=False, dropout_in=0, dropout_out=0,
-                 batch_first=False):
+                 batch_first=False, dropout_in=0, dropout_out=0,
+                 bidirectional=False):
         super(ParserLSTM, self).__init__()
 
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.bidirectional = bidirectional
+        self.batch_first = batch_first
         self.dropout_in = dropout_in
         self.dropout_out = dropout_out
-        self.batch_first = batch_first
+        self.bidirectional = bidirectional
         self.num_directions = 2 if bidirectional else 1
 
-        self.f_cells = []
-        self.b_cells = []
-        for i_layer in range(self.num_layers):
-            layer_input_size = (input_size if i_layer ==
-                                0 else hidden_size * self.num_directions)
-            for i_dir in range(self.num_directions):
-                cells = (self.f_cells if i_dir == 0 else self.b_cells)
-                cell = nn.LSTMCell(input_size=layer_input_size,
-                                   hidden_size=hidden_size)
-                self.reset_parameters(cell)
-                cells.append(cell)
+        self.f_cells = nn.ModuleList()
+        self.b_cells = nn.ModuleList()
+        for i in range(self.num_layers):
+            for j in range(self.num_directions):
+                cells = self.f_cells if j == 0 else self.b_cells
+                cells.append(nn.LSTMCell(input_size=input_size,
+                                         hidden_size=hidden_size))
+            input_size = hidden_size * self.num_directions
 
-        self.f_cells = torch.nn.ModuleList(self.f_cells)
-        self.b_cells = torch.nn.ModuleList(self.b_cells)
+        self.reset_parameters()
 
-    def reset_parameters(self, cell):
-        cell.bias_ih.data.zero_()
-        cell.bias_hh.data.zero_()
-
-        nn.init.orthogonal_(cell.weight_ih)
-        nn.init.orthogonal_(cell.weight_hh)
+    def reset_parameters(self):
+        for i in self.parameters():
+            # init weight
+            if len(i.shape) > 1:
+                nn.init.orthogonal_(i)
+            # init bias
+            else:
+                nn.init.zeros_(i)
 
     @staticmethod
     def _forward_rnn(cell, x, mask, initial, h_zero, in_drop_masks,
                      hid_drop_masks_for_next_timestamp, is_backward):
-        max_time = x.size(0)  # length batch dim
+        seq_len = x.size(0)  # length batch dim
         output = []
         # ??? What if I want to use an initial vector than can be tuned?
         hx = (initial, h_zero)
-        for t in range(max_time):
+        for t in range(seq_len):
             if is_backward:
-                t = max_time - t - 1
+                t = seq_len - t - 1
             input_i = x[t]
             if in_drop_masks is not None:
                 input_i = input_i * in_drop_masks
@@ -69,11 +67,11 @@ class ParserLSTM(nn.Module):
         return output  # , hx
 
     def forward(self, x, mask, initial=None):
-        mask = torch.unsqueeze(mask.transpose(0, 1), dim=2).float()
         if self.batch_first:
             x = x.transpose(0, 1)
-        max_time, batch_size, input_size = x.size()
-        assert (self.input_size == input_size)
+            mask = mask.transpose(0, 1)
+        mask = torch.unsqueeze(mask, dim=2).float()
+        seq_len, batch_size, input_size = x.shape
 
         h_zero = x.new_zeros((batch_size, self.hidden_size))
         if initial is None:
@@ -82,11 +80,11 @@ class ParserLSTM(nn.Module):
         # h_n, c_n = [], []
         for layer in range(self.num_layers):
             in_drop_mask, hid_drop_mask, hid_drop_mask_b = None, None, None
-            if self.training and self.dropout_in > 1e-3:
+            if self.training and self.dropout_in > 0:
                 in_drop_mask = torch.bernoulli(x.new_full(
                     (batch_size, x.size(2)), 1 - self.dropout_in))/(1 - self.dropout_in)
 
-            if self.training and self.dropout_out > 1e-3:
+            if self.training and self.dropout_out > 0:
                 hid_drop_mask = torch.bernoulli(x.new_full(
                     (batch_size, self.hidden_size), 1 - self.dropout_out))/(1 - self.dropout_out)
                 if self.bidirectional:
@@ -97,7 +95,8 @@ class ParserLSTM(nn.Module):
             layer_output = \
                 self._forward_rnn(cell=self.f_cells[layer],
                                   x=x,
-                                  mask=mask, initial=initial,
+                                  mask=mask,
+                                  initial=initial,
                                   h_zero=h_zero,
                                   in_drop_masks=in_drop_mask,
                                   hid_drop_masks_for_next_timestamp=hid_drop_mask,
@@ -107,7 +106,8 @@ class ParserLSTM(nn.Module):
             if self.bidirectional:
                 b_layer_output =  \
                     self._forward_rnn(cell=self.b_cells[layer],
-                                      x=x, mask=mask,
+                                      x=x,
+                                      mask=mask,
                                       initial=initial,
                                       h_zero=h_zero,
                                       in_drop_masks=in_drop_mask,
@@ -116,12 +116,14 @@ class ParserLSTM(nn.Module):
             #  , (b_layer_h_n, b_layer_c_n) = \
             # h_n.append(torch.cat([layer_h_n, b_layer_h_n], 1) if self.bidirectional else layer_h_n)
             # c_n.append(torch.cat([layer_c_n, b_layer_c_n], 1) if self.bidirectional else layer_c_n)
-            x = torch.cat([layer_output, b_layer_output],
-                          2) if self.bidirectional else layer_output
+            if self.bidirectional:
+                x = torch.cat([layer_output, b_layer_output], 2)
+            else:
+                x = layer_output
 
         # h_n = torch.stack(h_n, 0)
         # c_n = torch.stack(c_n, 0)
         if self.batch_first:
-            return x.transpose(0, 1)  # , (h_n, c_n)
-        else:
-            return x  # , (h_n, c_n)
+            x = x.transpose(0, 1)  # , (h_n, c_n)
+
+        return x  # , (h_n, c_n)
