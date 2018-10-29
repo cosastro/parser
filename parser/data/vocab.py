@@ -7,7 +7,6 @@ import torch.nn as nn
 class Vocab(object):
     PAD = '<PAD>'
     UNK = '<UNK>'
-    SOS = '<SOS>'
 
     def __init__(self, words, labels):
         self.pad_index = 0
@@ -94,6 +93,8 @@ class Vocab(object):
     def from_corpus(cls, corpus, min_freq=1):
         words = list(w for w, f in corpus.words.items() if f >= min_freq)
         labels = list(corpus.labels)
+        words.remove(corpus.ROOT)
+        labels.remove(corpus.ROOT)
         vocab = cls(words, labels)
 
         return vocab

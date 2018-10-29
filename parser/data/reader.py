@@ -33,7 +33,7 @@ class Corpus(object):
                 cols = list(zip(*[l.split() for l in lines[start:i]]))
                 word_seqs.append([cls.ROOT] + list(cols[1]))
                 head_seqs.append([0] + list(map(int, cols[6])))
-                label_seqs.append(['HED'] + list(cols[7]))
+                label_seqs.append([cls.ROOT] + list(cols[7]))
                 start = i + 1
 
         return word_seqs, head_seqs, label_seqs
