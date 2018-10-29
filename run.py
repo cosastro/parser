@@ -94,7 +94,7 @@ if __name__ == '__main__':
                            betas=Config.betas, lr=args.lr,
                            eps=Config.epsilon)
     scheduler = optim.lr_scheduler.LambdaLR(optimizer=optimizer,
-                                            lr_lambda=lambda x: .75 ** (x / 5000))
+                                            lr_lambda=lambda x: .75**(x/5000))
 
     trainer = Trainer(model=model,
                       vocab=vocab,
