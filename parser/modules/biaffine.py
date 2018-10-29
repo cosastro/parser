@@ -8,6 +8,7 @@ class BiAffine(nn.Module):
 
     def __init__(self, n_input, n_out=1, bias_x=True, bias_y=True):
         super(BiAffine, self).__init__()
+
         self.bias_x = bias_x
         self.bias_y = bias_y
         self.weight = nn.Parameter(torch.Tensor(n_out,
@@ -36,7 +37,7 @@ class BiAffine(nn.Module):
         return s
 
     def add_bias(self, x):
-        b = torch.ones(x.shape[:-1], device=x.device).unsqueeze(-1)
+        b = x.new_ones(x.shape[:-1]).unsqueeze(-1)
         x = torch.cat([x, b], -1)
 
         return x
