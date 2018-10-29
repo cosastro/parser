@@ -20,25 +20,27 @@ class ParserLSTM(nn.Module):
         self.bidirectional = bidirectional
         self.num_directions = 2 if bidirectional else 1
 
-        self.f_cells = nn.ModuleList()
-        self.b_cells = nn.ModuleList()
-        for i in range(self.num_layers):
-            for j in range(self.num_directions):
-                cells = self.f_cells if j == 0 else self.b_cells
-                cells.append(nn.LSTMCell(input_size=input_size,
-                                         hidden_size=hidden_size))
-            input_size = hidden_size * self.num_directions
+        self.f_cells = []
+        self.b_cells = []
+        for i_layer in range(self.num_layers):
+            layer_input_size = (input_size if i_layer ==
+                                0 else hidden_size * self.num_directions)
+            for i_dir in range(self.num_directions):
+                cells = (self.f_cells if i_dir == 0 else self.b_cells)
+                cell = nn.LSTMCell(input_size=layer_input_size,
+                                   hidden_size=hidden_size)
+                self.reset_parameters(cell)
+                cells.append(cell)
 
-        self.reset_parameters()
+        self.f_cells = torch.nn.ModuleList(self.f_cells)
+        self.b_cells = torch.nn.ModuleList(self.b_cells)
 
-    def reset_parameters(self):
-        for i in self.parameters():
-            # init weight
-            if len(i.shape) > 1:
-                nn.init.orthogonal_(i)
-            # init bias
-            else:
-                nn.init.zeros_(i)
+    def reset_parameters(self, cell):
+        cell.bias_ih.data.zero_()
+        cell.bias_hh.data.zero_()
+
+        nn.init.orthogonal_(cell.weight_ih)
+        nn.init.orthogonal_(cell.weight_hh)
 
     @staticmethod
     def _forward_rnn(cell, x, mask, initial, h_zero, in_drop_masks,
@@ -55,8 +57,8 @@ class ParserLSTM(nn.Module):
                 input_i = input_i * in_drop_masks
             h_next, c_next = cell(input=input_i, hx=hx)
             # element-wise multiply; broadcast
-            h_next = h_next*mask[t] + h_zero[0]*(1-mask[t])
-            c_next = c_next*mask[t] + h_zero[1]*(1-mask[t])
+            h_next = h_next * mask[t] + h_zero[0] * (1 - mask[t])
+            c_next = c_next * mask[t] + h_zero[1] * (1 - mask[t])
             output.append(h_next)  # NO drop for now
             if hid_drop_masks_for_next_timestamp is not None:
                 h_next = h_next * hid_drop_masks_for_next_timestamp
@@ -67,10 +69,9 @@ class ParserLSTM(nn.Module):
         return output  # , hx
 
     def forward(self, x, mask, initial=None):
+        mask = torch.unsqueeze(mask.transpose(0, 1), dim=2).float()
         if self.batch_first:
             x = x.transpose(0, 1)
-            mask = mask.transpose(0, 1)
-        mask = torch.unsqueeze(mask, dim=2).float()
         seq_len, batch_size, input_size = x.shape
 
         h_zero = x.new_zeros((batch_size, self.hidden_size))
@@ -80,11 +81,11 @@ class ParserLSTM(nn.Module):
         # h_n, c_n = [], []
         for layer in range(self.num_layers):
             in_drop_mask, hid_drop_mask, hid_drop_mask_b = None, None, None
-            if self.training and self.dropout_in > 0:
+            if self.training and self.dropout_in > 1e-3:
                 in_drop_mask = torch.bernoulli(x.new_full(
                     (batch_size, x.size(2)), 1 - self.dropout_in))/(1 - self.dropout_in)
 
-            if self.training and self.dropout_out > 0:
+            if self.training and self.dropout_out > 1e-3:
                 hid_drop_mask = torch.bernoulli(x.new_full(
                     (batch_size, self.hidden_size), 1 - self.dropout_out))/(1 - self.dropout_out)
                 if self.bidirectional:
