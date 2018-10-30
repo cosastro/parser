@@ -39,7 +39,7 @@ class ParserLSTM(nn.Module):
             else:
                 nn.init.zeros_(i)
 
-    def _lstm_forward(self, cell, x, mask, initial, h_zero, in_drop_masks,
+    def _lstm_forward(self, x, cell, mask, initial, h_zero, in_drop_masks,
                       hid_drop_masks_for_next_timestamp, is_backward):
         seq_len = x.size(0)  # length batch dim
         output = []
@@ -87,8 +87,8 @@ class ParserLSTM(nn.Module):
                         (batch_size, self.hidden_size), 1 - self.dropout))/(1 - self.dropout)
 
             # , (layer_h_n, layer_c_n) = \
-            layer_output = self._lstm_forward(cell=self.f_cells[layer],
-                                              x=x,
+            layer_output = self._lstm_forward(x=x,
+                                              cell=self.f_cells[layer],
                                               mask=mask,
                                               initial=initial,
                                               h_zero=h_zero,
@@ -98,8 +98,8 @@ class ParserLSTM(nn.Module):
 
             #  only share input_dropout
             if self.bidirectional:
-                b_layer_output = self._lstm_forward(cell=self.b_cells[layer],
-                                                    x=x,
+                b_layer_output = self._lstm_forward(x=x,
+                                                    cell=self.b_cells[layer],
                                                     mask=mask,
                                                     initial=initial,
                                                     h_zero=h_zero,
