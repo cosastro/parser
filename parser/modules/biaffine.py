@@ -19,9 +19,7 @@ class BiAffine(nn.Module):
         self.reset_parameters()
 
     def extra_repr(self):
-        info = f"n_in={self.n_in}"
-        if self.n_out > 1:
-            info += f", n_out={self.n_out}"
+        info = f"n_in={self.n_in}, n_out={self.n_out}"
         if self.bias_x:
             info += f", bias_x={self.bias_x}"
         if self.bias_y:
