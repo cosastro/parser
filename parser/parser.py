@@ -42,7 +42,6 @@ class BiAffineParser(nn.Module):
         self.mlp_arc_d = MLP(n_in=n_lstm_hidden * 2,
                              n_hidden=n_mlp_arc,
                              drop=drop)
-
         self.mlp_lab_h = MLP(n_in=n_lstm_hidden * 2,
                              n_hidden=n_mlp_lab,
                              drop=drop)
