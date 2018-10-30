@@ -5,20 +5,28 @@ import torch.nn as nn
 
 
 class SharedDropout(nn.Module):
-    def __init__(self, p=0):
+    def __init__(self, p=0, batch_first=True):
         super(SharedDropout, self).__init__()
 
         self.p = p
+        self.batch_first = batch_first
 
     def extra_repr(self):
-        return f'p={self.p}'
+        info = f"p={self.p}"
+        if self.batch_first:
+            info += f", batch_first={self.batch_first}"
+
+        return info
 
     def forward(self, x):
         if self.training:
-            batch_size, seq_len = x.shape[:2]
+            if self.batch_first:
+                batch_size, seq_len = x.shape[:2]
+            else:
+                seq_len, batch_size = x.shape[:2]
             mask = x.new_full((batch_size, *x.shape[2:]), 1 - self.p)
             mask = torch.bernoulli(mask) / (1 - self.p)
-            x = x * mask.unsqueeze(1)
+            x = x * mask.unsqueeze(1) if self.batch_first else x * mask
 
         return x
 
@@ -30,7 +38,7 @@ class IndependentDropout(nn.Module):
         self.p = p
 
     def extra_repr(self):
-        return f'p={self.p}'
+        return f"p={self.p}"
 
     def forward(self, x, y):
         if self.training:
