@@ -6,15 +6,22 @@ import torch.nn as nn
 
 class BiAffine(nn.Module):
 
-    def __init__(self, n_input, n_out=1, bias_x=True, bias_y=True):
+    def __init__(self, n_in, n_out=1, bias_x=True, bias_y=True):
         super(BiAffine, self).__init__()
 
+        self.n_in = n_in
+        self.n_out = n_out
         self.bias_x = bias_x
         self.bias_y = bias_y
         self.weight = nn.Parameter(torch.Tensor(n_out,
-                                                n_input + bias_x,
-                                                n_input + bias_y))
+                                                n_in + bias_x,
+                                                n_in + bias_y))
         self.reset_parameters()
+
+    def extra_repr(self):
+        return "n_in={}, n_out={}, bias_x={}, bias_y={}".format(
+            self.n_in, self.n_out, self.bias_x, self.bias_y
+        )
 
     def reset_parameters(self):
         bias = 1. / self.weight.size(1) ** 0.5

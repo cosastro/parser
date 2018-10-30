@@ -37,25 +37,25 @@ class BiAffineParser(nn.Module):
         self.lstm_drop = SharedDropout(p=drop)
 
         # the MLP layers
-        self.mlp_arc_h = MLP(n_input=n_lstm_hidden * 2,
+        self.mlp_arc_h = MLP(n_in=n_lstm_hidden * 2,
                              n_hidden=n_mlp_arc,
                              drop=drop)
-        self.mlp_arc_d = MLP(n_input=n_lstm_hidden * 2,
+        self.mlp_arc_d = MLP(n_in=n_lstm_hidden * 2,
                              n_hidden=n_mlp_arc,
                              drop=drop)
 
-        self.mlp_lab_h = MLP(n_input=n_lstm_hidden * 2,
+        self.mlp_lab_h = MLP(n_in=n_lstm_hidden * 2,
                              n_hidden=n_mlp_lab,
                              drop=drop)
-        self.mlp_lab_d = MLP(n_input=n_lstm_hidden * 2,
+        self.mlp_lab_d = MLP(n_in=n_lstm_hidden * 2,
                              n_hidden=n_mlp_lab,
                              drop=drop)
 
         # the BiAffine layers
-        self.arc_attn = BiAffine(n_input=n_mlp_arc,
+        self.arc_attn = BiAffine(n_in=n_mlp_arc,
                                  bias_x=True,
                                  bias_y=False)
-        self.lab_attn = BiAffine(n_input=n_mlp_lab,
+        self.lab_attn = BiAffine(n_in=n_mlp_lab,
                                  n_out=n_labels,
                                  bias_x=True,
                                  bias_y=True)

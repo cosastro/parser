@@ -7,10 +7,10 @@ import torch.nn as nn
 
 class MLP(nn.Module):
 
-    def __init__(self, n_input, n_hidden, drop):
+    def __init__(self, n_in, n_hidden, drop):
         super(MLP, self).__init__()
 
-        self.linear = nn.Linear(n_input, n_hidden)
+        self.linear = nn.Linear(n_in, n_hidden)
         self.activation = nn.LeakyReLU(negative_slope=0.1)
         self.drop = SharedDropout(drop)
 
