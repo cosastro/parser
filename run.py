@@ -14,7 +14,7 @@ from config import Config
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Create several models for Sequence Labeling.'
+        description='Create the Biaffine Parser model.'
     )
     parser.add_argument('--drop', action='store', default=0.33, type=float,
                         help='set the prob of dropout')
