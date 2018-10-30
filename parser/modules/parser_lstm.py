@@ -7,44 +7,40 @@ import torch.nn as nn
 class ParserLSTM(nn.Module):
 
     def __init__(self, input_size, hidden_size, num_layers=1,
-                 batch_first=False, dropout_in=0, dropout_out=0,
-                 bidirectional=False):
+                 batch_first=False, dropout=0, bidirectional=False):
         super(ParserLSTM, self).__init__()
 
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.batch_first = batch_first
-        self.dropout_in = dropout_in
-        self.dropout_out = dropout_out
+        self.dropout = dropout
         self.bidirectional = bidirectional
         self.num_directions = 2 if bidirectional else 1
 
-        self.f_cells = []
-        self.b_cells = []
-        for i_layer in range(self.num_layers):
-            layer_input_size = (input_size if i_layer ==
-                                0 else hidden_size * self.num_directions)
-            for i_dir in range(self.num_directions):
-                cells = (self.f_cells if i_dir == 0 else self.b_cells)
-                cell = nn.LSTMCell(input_size=layer_input_size,
-                                   hidden_size=hidden_size)
-                self.reset_parameters(cell)
-                cells.append(cell)
+        self.f_cells = nn.ModuleList()
+        self.b_cells = nn.ModuleList()
+        for layer in range(self.num_layers):
+            self.f_cells.append(nn.LSTMCell(input_size=input_size,
+                                            hidden_size=hidden_size))
+            if bidirectional:
+                self.b_cells.append(nn.LSTMCell(input_size=input_size,
+                                                hidden_size=hidden_size))
+            input_size = hidden_size * self.num_directions
 
-        self.f_cells = torch.nn.ModuleList(self.f_cells)
-        self.b_cells = torch.nn.ModuleList(self.b_cells)
+        self.reset_parameters()
 
-    def reset_parameters(self, cell):
-        cell.bias_ih.data.zero_()
-        cell.bias_hh.data.zero_()
+    def reset_parameters(self):
+        for i in self.parameters():
+            # apply orthogonal_ to weight
+            if len(i.shape) > 1:
+                nn.init.orthogonal_(i)
+            # apply zeros_ to bias
+            else:
+                nn.init.zeros_(i)
 
-        nn.init.orthogonal_(cell.weight_ih)
-        nn.init.orthogonal_(cell.weight_hh)
-
-    @staticmethod
-    def _forward_rnn(cell, x, mask, initial, h_zero, in_drop_masks,
-                     hid_drop_masks_for_next_timestamp, is_backward):
+    def _lstm_forward(self, cell, x, mask, initial, h_zero, in_drop_masks,
+                      hid_drop_masks_for_next_timestamp, is_backward):
         seq_len = x.size(0)  # length batch dim
         output = []
         # ??? What if I want to use an initial vector than can be tuned?
@@ -81,39 +77,35 @@ class ParserLSTM(nn.Module):
         # h_n, c_n = [], []
         for layer in range(self.num_layers):
             in_drop_mask, hid_drop_mask, hid_drop_mask_b = None, None, None
-            if self.training and self.dropout_in > 1e-3:
+            if self.training:
                 in_drop_mask = torch.bernoulli(x.new_full(
-                    (batch_size, x.size(2)), 1 - self.dropout_in))/(1 - self.dropout_in)
-
-            if self.training and self.dropout_out > 1e-3:
+                    (batch_size, x.size(2)), 1 - self.dropout))/(1 - self.dropout)
                 hid_drop_mask = torch.bernoulli(x.new_full(
-                    (batch_size, self.hidden_size), 1 - self.dropout_out))/(1 - self.dropout_out)
+                    (batch_size, self.hidden_size), 1 - self.dropout))/(1 - self.dropout)
                 if self.bidirectional:
                     hid_drop_mask_b = torch.bernoulli(x.new_full(
-                        (batch_size, self.hidden_size), 1 - self.dropout_out))/(1 - self.dropout_out)
+                        (batch_size, self.hidden_size), 1 - self.dropout))/(1 - self.dropout)
 
             # , (layer_h_n, layer_c_n) = \
-            layer_output = \
-                self._forward_rnn(cell=self.f_cells[layer],
-                                  x=x,
-                                  mask=mask,
-                                  initial=initial,
-                                  h_zero=h_zero,
-                                  in_drop_masks=in_drop_mask,
-                                  hid_drop_masks_for_next_timestamp=hid_drop_mask,
-                                  is_backward=False)
+            layer_output = self._lstm_forward(cell=self.f_cells[layer],
+                                              x=x,
+                                              mask=mask,
+                                              initial=initial,
+                                              h_zero=h_zero,
+                                              in_drop_masks=in_drop_mask,
+                                              hid_drop_masks_for_next_timestamp=hid_drop_mask,
+                                              is_backward=False)
 
             #  only share input_dropout
             if self.bidirectional:
-                b_layer_output =  \
-                    self._forward_rnn(cell=self.b_cells[layer],
-                                      x=x,
-                                      mask=mask,
-                                      initial=initial,
-                                      h_zero=h_zero,
-                                      in_drop_masks=in_drop_mask,
-                                      hid_drop_masks_for_next_timestamp=hid_drop_mask_b,
-                                      is_backward=True)
+                b_layer_output = self._lstm_forward(cell=self.b_cells[layer],
+                                                    x=x,
+                                                    mask=mask,
+                                                    initial=initial,
+                                                    h_zero=h_zero,
+                                                    in_drop_masks=in_drop_mask,
+                                                    hid_drop_masks_for_next_timestamp=hid_drop_mask_b,
+                                                    is_backward=True)
             #  , (b_layer_h_n, b_layer_c_n) = \
             # h_n.append(torch.cat([layer_h_n, b_layer_h_n], 1) if self.bidirectional else layer_h_n)
             # c_n.append(torch.cat([layer_c_n, b_layer_c_n], 1) if self.bidirectional else layer_c_n)

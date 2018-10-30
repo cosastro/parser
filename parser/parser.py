@@ -31,8 +31,7 @@ class BiAffineParser(nn.Module):
                                hidden_size=n_lstm_hidden,
                                num_layers=n_lstm_layers,
                                batch_first=True,
-                               dropout_in=drop,
-                               dropout_out=drop,
+                               dropout=drop,
                                bidirectional=True)
         self.lstm_drop = SharedDropout(p=drop)
 
