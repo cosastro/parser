@@ -19,9 +19,15 @@ class BiAffine(nn.Module):
         self.reset_parameters()
 
     def extra_repr(self):
-        return "n_in={}, n_out={}, bias_x={}, bias_y={}".format(
-            self.n_in, self.n_out, self.bias_x, self.bias_y
-        )
+        info = f"n_in={self.n_in}"
+        if self.n_out > 1:
+            info += f", n_out={self.n_out}"
+        if self.bias_x:
+            info += f", bias_x={self.bias_x}"
+        if self.bias_y:
+            info += f", bias_y={self.bias_y}"
+
+        return info
 
     def reset_parameters(self):
         bias = 1. / self.weight.size(1) ** 0.5
