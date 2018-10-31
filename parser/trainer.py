@@ -44,7 +44,9 @@ class Trainer(object):
                 max_e, max_metric = epoch, dev_metric
             elif epoch - max_e >= patience:
                 break
-        self.model = torch.load(file).cuda()
+        self.model = torch.load(file)
+        if torch.cuda.is_available:
+            self.model = self.model.cuda()
         loss, metric = self.evaluate(test_loader)
 
         print(f"max score of dev is {max_metric.score:.2%} at epoch {max_e}")
