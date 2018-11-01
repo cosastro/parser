@@ -45,7 +45,7 @@ class Trainer(object):
             elif epoch - max_e >= patience:
                 break
         self.model = torch.load(file)
-        if torch.cuda.is_available:
+        if torch.cuda.is_available():
             self.model = self.model.cuda()
         loss, metric = self.evaluate(test_loader)
 
@@ -75,8 +75,7 @@ class Trainer(object):
     def evaluate(self, loader):
         self.model.eval()
 
-        loss = 0
-        metric = AttachmentMethod()
+        loss, metric = 0, AttachmentMethod()
 
         for x, char_x, heads, labels in loader:
             mask = x.gt(0)
