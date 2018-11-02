@@ -39,12 +39,12 @@ class ParserLSTM(nn.Module):
             else:
                 nn.init.zeros_(i)
 
-    def _lstm_forward(self, x, hx, mask, cell, in_drop_mask,
-                      hid_drop_mask, reverse):
-        seq_len = x.size(0)  # length batch dim
+    def _lstm_forward(self, x, hx, mask, cell, in_mask,
+                      hid_mask, reverse):
         output = []
-        if in_drop_mask is not None:
-            x = x * in_drop_mask
+        seq_len = x.size(0)
+        if in_mask is not None:
+            x = x * in_mask
         steps = reversed(range(seq_len)) if reverse else range(seq_len)
 
         for t in steps:
@@ -52,8 +52,8 @@ class ParserLSTM(nn.Module):
             h_next = h_next * mask[t]
             c_next = c_next * mask[t]
             output.append(h_next)
-            if hid_drop_mask is not None:
-                h_next = h_next * hid_drop_mask
+            if hid_mask is not None:
+                h_next = h_next * hid_mask
             hx = (h_next, c_next)
         if reverse:
             output.reverse()
@@ -72,29 +72,28 @@ class ParserLSTM(nn.Module):
             initial = x.new_zeros(batch_size, self.hidden_size)
             hx = (initial, initial)
 
-        # h_n, c_n = [], []
         for layer in range(self.num_layers):
-            in_drop_mask, hid_drop_mask, hid_drop_mask_b = None, None, None
+            in_mask, hid_mask, b_hid_mask = None, None, None
             if self.training:
-                in_drop_mask = torch.bernoulli(
+                in_mask = torch.bernoulli(
                     x.new_full((batch_size, x.size(2)), 1 - self.dropout)
                 ) / (1 - self.dropout)
-                hid_drop_mask = torch.bernoulli(
+                hid_mask = torch.bernoulli(
                     x.new_full((batch_size, self.hidden_size),
                                1 - self.dropout)
                 ) / (1 - self.dropout)
                 if self.bidirectional:
-                    hid_drop_mask_b = torch.bernoulli(
+                    b_hid_mask = torch.bernoulli(
                         x.new_full((batch_size, self.hidden_size),
                                    1 - self.dropout)
-                    )/(1 - self.dropout)
+                    ) / (1 - self.dropout)
 
             layer_output = self._lstm_forward(x=x,
                                               hx=hx,
                                               mask=mask,
                                               cell=self.f_cells[layer],
-                                              in_drop_mask=in_drop_mask,
-                                              hid_drop_mask=hid_drop_mask,
+                                              in_mask=in_mask,
+                                              hid_mask=hid_mask,
                                               reverse=False)
 
             if self.bidirectional:
@@ -102,16 +101,14 @@ class ParserLSTM(nn.Module):
                                                     hx=hx,
                                                     mask=mask,
                                                     cell=self.b_cells[layer],
-                                                    in_drop_mask=in_drop_mask,
-                                                    hid_drop_mask=hid_drop_mask_b,
+                                                    in_mask=in_mask,
+                                                    hid_mask=b_hid_mask,
                                                     reverse=True)
             if self.bidirectional:
                 x = torch.cat([layer_output, b_layer_output], 2)
             else:
                 x = layer_output
 
-        # h_n = torch.stack(h_n, 0)
-        # c_n = torch.stack(c_n, 0)
         if self.batch_first:
             x = x.transpose(0, 1)
 
