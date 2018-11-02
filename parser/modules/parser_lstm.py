@@ -39,40 +39,38 @@ class ParserLSTM(nn.Module):
             else:
                 nn.init.zeros_(i)
 
-    def _lstm_forward(self, x, cell, mask, initial, h_zero, in_drop_masks,
-                      hid_drop_masks_for_next_timestamp, is_backward):
+    def _lstm_forward(self, x, hx, mask, cell, in_drop_mask,
+                      hid_drop_mask, reverse):
         seq_len = x.size(0)  # length batch dim
         output = []
-        # ??? What if I want to use an initial vector than can be tuned?
-        hx = (initial, h_zero)
-        for t in range(seq_len):
-            if is_backward:
-                t = seq_len - t - 1
-            input_i = x[t]
-            if in_drop_masks is not None:
-                input_i = input_i * in_drop_masks
-            h_next, c_next = cell(input=input_i, hx=hx)
-            # element-wise multiply; broadcast
-            h_next = h_next * mask[t] + h_zero[0] * (1 - mask[t])
-            c_next = c_next * mask[t] + h_zero[1] * (1 - mask[t])
-            output.append(h_next)  # NO drop for now
-            if hid_drop_masks_for_next_timestamp is not None:
-                h_next = h_next * hid_drop_masks_for_next_timestamp
+        if in_drop_mask is not None:
+            x = x * in_drop_mask
+        steps = reversed(range(seq_len)) if reverse else range(seq_len)
+
+        for t in steps:
+            h_next, c_next = cell(input=x[t], hx=hx)
+            h_next = h_next * mask[t]
+            c_next = c_next * mask[t]
+            output.append(h_next)
+            if hid_drop_mask is not None:
+                h_next = h_next * hid_drop_mask
             hx = (h_next, c_next)
-        if is_backward:
+        if reverse:
             output.reverse()
         output = torch.stack(output, 0)
-        return output  # , hx
 
-    def forward(self, x, mask, initial=None):
-        mask = torch.unsqueeze(mask.transpose(0, 1), dim=2).float()
+        return output
+
+    def forward(self, x, mask, hx=None):
         if self.batch_first:
             x = x.transpose(0, 1)
+            mask = mask.transpose(0, 1)
+        mask = torch.unsqueeze(mask, dim=2).float()
         seq_len, batch_size, input_size = x.shape
 
-        h_zero = x.new_zeros((batch_size, self.hidden_size))
-        if initial is None:
-            initial = h_zero
+        if hx is None:
+            initial = x.new_zeros(batch_size, self.hidden_size)
+            hx = (initial, initial)
 
         # h_n, c_n = [], []
         for layer in range(self.num_layers):
@@ -88,24 +86,22 @@ class ParserLSTM(nn.Module):
 
             # , (layer_h_n, layer_c_n) = \
             layer_output = self._lstm_forward(x=x,
-                                              cell=self.f_cells[layer],
+                                              hx=hx,
                                               mask=mask,
-                                              initial=initial,
-                                              h_zero=h_zero,
-                                              in_drop_masks=in_drop_mask,
-                                              hid_drop_masks_for_next_timestamp=hid_drop_mask,
-                                              is_backward=False)
+                                              cell=self.f_cells[layer],
+                                              in_drop_mask=in_drop_mask,
+                                              hid_drop_mask=hid_drop_mask,
+                                              reverse=False)
 
             #  only share input_dropout
             if self.bidirectional:
                 b_layer_output = self._lstm_forward(x=x,
-                                                    cell=self.b_cells[layer],
+                                                    hx=hx,
                                                     mask=mask,
-                                                    initial=initial,
-                                                    h_zero=h_zero,
-                                                    in_drop_masks=in_drop_mask,
-                                                    hid_drop_masks_for_next_timestamp=hid_drop_mask_b,
-                                                    is_backward=True)
+                                                    cell=self.b_cells[layer],
+                                                    in_drop_mask=in_drop_mask,
+                                                    hid_drop_mask=hid_drop_mask_b,
+                                                    reverse=True)
             #  , (b_layer_h_n, b_layer_c_n) = \
             # h_n.append(torch.cat([layer_h_n, b_layer_h_n], 1) if self.bidirectional else layer_h_n)
             # c_n.append(torch.cat([layer_c_n, b_layer_c_n], 1) if self.bidirectional else layer_c_n)
