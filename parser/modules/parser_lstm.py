@@ -76,15 +76,19 @@ class ParserLSTM(nn.Module):
         for layer in range(self.num_layers):
             in_drop_mask, hid_drop_mask, hid_drop_mask_b = None, None, None
             if self.training:
-                in_drop_mask = torch.bernoulli(x.new_full(
-                    (batch_size, x.size(2)), 1 - self.dropout))/(1 - self.dropout)
-                hid_drop_mask = torch.bernoulli(x.new_full(
-                    (batch_size, self.hidden_size), 1 - self.dropout))/(1 - self.dropout)
+                in_drop_mask = torch.bernoulli(
+                    x.new_full((batch_size, x.size(2)), 1 - self.dropout)
+                ) / (1 - self.dropout)
+                hid_drop_mask = torch.bernoulli(
+                    x.new_full((batch_size, self.hidden_size),
+                               1 - self.dropout)
+                ) / (1 - self.dropout)
                 if self.bidirectional:
-                    hid_drop_mask_b = torch.bernoulli(x.new_full(
-                        (batch_size, self.hidden_size), 1 - self.dropout))/(1 - self.dropout)
+                    hid_drop_mask_b = torch.bernoulli(
+                        x.new_full((batch_size, self.hidden_size),
+                                   1 - self.dropout)
+                    )/(1 - self.dropout)
 
-            # , (layer_h_n, layer_c_n) = \
             layer_output = self._lstm_forward(x=x,
                                               hx=hx,
                                               mask=mask,
@@ -93,7 +97,6 @@ class ParserLSTM(nn.Module):
                                               hid_drop_mask=hid_drop_mask,
                                               reverse=False)
 
-            #  only share input_dropout
             if self.bidirectional:
                 b_layer_output = self._lstm_forward(x=x,
                                                     hx=hx,
@@ -102,9 +105,6 @@ class ParserLSTM(nn.Module):
                                                     in_drop_mask=in_drop_mask,
                                                     hid_drop_mask=hid_drop_mask_b,
                                                     reverse=True)
-            #  , (b_layer_h_n, b_layer_c_n) = \
-            # h_n.append(torch.cat([layer_h_n, b_layer_h_n], 1) if self.bidirectional else layer_h_n)
-            # c_n.append(torch.cat([layer_c_n, b_layer_c_n], 1) if self.bidirectional else layer_c_n)
             if self.bidirectional:
                 x = torch.cat([layer_output, b_layer_output], 2)
             else:
@@ -113,6 +113,6 @@ class ParserLSTM(nn.Module):
         # h_n = torch.stack(h_n, 0)
         # c_n = torch.stack(c_n, 0)
         if self.batch_first:
-            x = x.transpose(0, 1)  # , (h_n, c_n)
+            x = x.transpose(0, 1)
 
-        return x  # , (h_n, c_n)
+        return x
